@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5" />
+    <meta name="theme-color" content="#1d5c52" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f1a17" media="(prefers-color-scheme: dark)" />
+    <meta name="description" content="Medik Triage — AI diagnostic assistant. Describe symptoms, get evidence-informed possibilities, red flags, and next steps. Web search grounded." />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Medik Triage" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <title>Medik Triage — AI Diagnostic</title>
+    <script>
+      try {
+        var p = JSON.parse(localStorage.getItem('medik-preferences-v1') || '{}')
+        document.documentElement.setAttribute('data-theme', p.theme || 'light')
+      } catch (e) { document.documentElement.setAttribute('data-theme', 'light') }
+    </script>
+    <style>
+      html { -webkit-text-size-adjust: 100%; }
+      body { margin:0; min-height:100dvh; min-height:100vh; }
+      #root { min-height:100dvh; display:flex; flex-direction:column; }
+      @supports (padding: env(safe-area-inset-bottom)) {
+        body { padding-bottom: env(safe-area-inset-bottom); }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js').catch(() => {})
+        })
+      }
+    </script>
+    <noscript><p style="text-align:center;padding:1rem;font-family:system-ui">Enable JavaScript to use Medik Triage.</p></noscript>
+  </body>
+</html>

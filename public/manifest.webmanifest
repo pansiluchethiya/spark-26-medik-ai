@@ -1,0 +1,26 @@
+{
+  "name": "Medik Triage",
+  "short_name": "Medik",
+  "description": "AI diagnostic triage assistant. Describe symptoms, get evidence-informed possibilities, red flags, and next steps.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fcfaf7",
+  "theme_color": "#1d5c52",
+  "orientation": "portrait-primary",
+  "categories": ["medical", "health", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "prefer_related_applications": false
+}

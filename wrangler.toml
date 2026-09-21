@@ -1,0 +1,17 @@
+name = "medik-triage"
+compatibility_date = "2024-11-14"
+pages_build_output_dir = "dist"
+
+[build]
+command = "npm run build"
+
+# Cloudflare Pages — Build output dir is `dist`, Functions dir is `functions/`
+# Deploy via: `npx wrangler pages deploy dist --project-name=medik-triage`
+# Or connect GitHub repo and set Build command = `npm run build`, Output = `dist`
+
+[vars]
+# Environment variables (set in Cloudflare dashboard > Settings > Variables or via .env)
+# GROQ_API_KEY = required for fast triage (Groq OSS 120B)
+# GROQ_MODEL = openai/gpt-oss-120b (default)
+# TAVILY_API_KEY = optional, improves web search quality (fallback: DuckDuckGo)
+# GEMINI_API_KEY = optional fallback provider
