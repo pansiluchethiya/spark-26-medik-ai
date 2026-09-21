@@ -132,10 +132,13 @@ Serves `dist/` on port 4100 with the API and SPA fallback.
 1. Push your repo to GitHub
 2. Go to [Cloudflare Pages > Create a project](https://dash.cloudflare.com/?to=/:account/pages)
 3. Set:
-   - **Build command**: `npm run build`
-   - **Build output directory**: `dist`
-   - **Environment variables**: `GROQ_API_KEY`, `TAVILY_API_KEY`, `GEMINI_API_KEY`
+    - **Build command**: `npm run build`
+    - **Build output directory**: `dist`
+    - **Environment variables**: `GROQ_API_KEY`, `TAVILY_API_KEY`, `GEMINI_API_KEY`
+      (set these in the Pages dashboard under **Settings → Environment variables** — do NOT commit secrets to the repo; use `.env.example` as a template)
 4. Click **Save and Deploy**
+
+**Auto-redeploy**: Cloudflare Pages automatically rebuilds and redeploys on every push to `main`. After adding environment variables in the dashboard, simply commit any change and push — the site updates automatically.
 
 ### Deploy via wrangler CLI
 
