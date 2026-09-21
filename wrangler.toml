@@ -2,12 +2,10 @@ name = "medik-triage"
 compatibility_date = "2024-11-14"
 pages_build_output_dir = "dist"
 
-[build]
-command = "npm run build"
-
-# Cloudflare Pages — Build output dir is `dist`, Functions dir is `functions/`
-# Deploy via: `npx wrangler pages deploy dist --project-name=medik-triage`
-# Or connect GitHub repo and set Build command = `npm run build`, Output = `dist`
+# Cloudflare Pages — Build settings are configured in the Pages dashboard:
+# Build command: npm run build
+# Output directory: dist
+# Functions dir: functions/ (auto-detected in dist/functions/ after build)
 
 [vars]
 # Environment variables (set in Cloudflare dashboard > Settings > Variables or via .env)
