@@ -81,8 +81,6 @@ export default function App() {
     }
   }
 
-  const clearHistory = () => persistMessages([])
-
   const updatePreferences = (next: LocalPreferences) => {
     setPreferences(next)
     localStorage.setItem(preferencesKey, JSON.stringify(next))
