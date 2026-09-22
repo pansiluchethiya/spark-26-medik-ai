@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "ci.us.medik.twa",
+      "sha256_cert_fingerprints": [
+        "C7:F1:D4:6B:7C:00:86:A9:E2:36:97:F9:62:90:91:CE:B3:64:1F:94:15:27:F0:77:77:5A:41:79:8F:52:B7:44"
+      ]
+    }
+  }
+]

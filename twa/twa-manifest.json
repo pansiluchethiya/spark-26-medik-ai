@@ -1,0 +1,34 @@
+{
+  "packageId": "ci.us.medik.twa",
+  "host": "medik.us.ci",
+  "name": "Medik",
+  "launcherName": "Medik",
+  "display": "standalone",
+  "orientation": "portrait",
+  "themeColor": "#1d5c52",
+  "themeColorDark": "#0f1a17",
+  "navigationColor": "#1d5c52",
+  "navigationColorDark": "#0f1a17",
+  "navigationDividerColor": "#1d5c52",
+  "navigationDividerColorDark": "#0f1a17",
+  "backgroundColor": "#fcfaf7",
+  "enableNotifications": false,
+  "startUrl": "/",
+  "iconUrl": "https://medik.us.ci/icons/icon-512.png",
+  "maskableIconUrl": "https://medik.us.ci/icons/icon-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./medik-twa.jks",
+    "alias": "medik-twa"
+  },
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "fingerprints": [
+    {
+      "name": "release",
+      "value": "C7:F1:D4:6B:7C:00:86:A9:E2:36:97:F9:62:90:91:CE:B3:64:1F:94:15:27:F0:77:77:5A:41:79:8F:52:B7:44"
+    }
+  ],
+  "fallbackType": "customtabs",
+  "generatorApp": "bubblewrap-cli"
+}
