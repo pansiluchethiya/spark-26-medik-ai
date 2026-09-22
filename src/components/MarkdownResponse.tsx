@@ -2,7 +2,6 @@ import ReactMarkdown from 'react-markdown'
 import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import { cn } from '../lib/cn'
-import { normalizeSections, splitNormalized, stripSectionTags } from '../lib/sections'
 import { HeartPulse, ShieldAlert, ListChecks, BookOpen, Info } from 'lucide-react'
 
 type MarkdownSectionKind = 'assessment' | 'urgent' | 'selfcare' | 'sources' | 'body'
@@ -18,21 +17,33 @@ function sectionKindFromTitle(title: string): MarkdownSectionKind {
   return 'body'
 }
 
-function splitSections(content: string): MarkdownSection[] {
-  // Normalize tolerant tag variants ([SECTION: x], **[SECTION:x]**, inline)
-  // then split on tag lines — every section always parses.
-  const normalized = normalizeSections(content)
-  const blocks = splitNormalized(normalized)
-  if (blocks.length) {
-    const toSection = (kind: string, body: string): MarkdownSection => {
-      const raw = kind.toLowerCase()
-      if (raw === 'assessment') return { title: 'What this could be', content: body, kind: 'assessment' }
-      if (raw === 'urgent') return { title: 'When to seek care quickly', content: body, kind: 'urgent' }
-      if (raw === 'selfcare' || raw === 'actions') return { title: 'What you can do now', content: body, kind: 'selfcare' }
-      if (raw === 'sources') return { title: 'Sources & further reading', content: body, kind: 'sources' }
-      return { title: 'Overview', content: body, kind: 'body' }
-    }
-    return blocks.map((b) => toSection(b.kind, stripSectionTags(b.body)))
+const EXPLICIT_TAG = /\[SECTION:(assessment|urgent|selfcare|sources|actions|body)\]/gi
+
+export function splitSections(content: string): MarkdownSection[] {
+  // Normalize: models often emit **[SECTION:x]** or inline tags. Unwrap bold
+  // markers so tags are plain, then split on tag occurrences anywhere.
+  const normalized = content.replace(/\*\*(\[SECTION:[a-z]+\])\*\*/gi, '$1')
+  const boundaries: Array<{ kind: string; index: number; end: number }> = []
+  for (const match of normalized.matchAll(EXPLICIT_TAG)) {
+    boundaries.push({ kind: match[1].toLowerCase(), index: match.index ?? 0, end: (match.index ?? 0) + match[0].length })
+  }
+  if (boundaries.length) {
+    const sections = boundaries.map((b, i) => {
+      const rawBody = normalized.slice(b.end, i + 1 < boundaries.length ? boundaries[i + 1].index : undefined)
+      // Drop any leftover raw tags that slipped inside a body.
+      const body = rawBody.replace(EXPLICIT_TAG, '').trim()
+      let kind: MarkdownSectionKind = 'body'
+      let title = 'Overview'
+      if (b.kind === 'assessment') { kind = 'assessment'; title = 'What this could be' }
+      else if (b.kind === 'urgent') { kind = 'urgent'; title = 'When to seek care quickly' }
+      else if (b.kind === 'selfcare' || b.kind === 'actions') { kind = 'selfcare'; title = 'What you can do now' }
+      else if (b.kind === 'sources') { kind = 'sources'; title = 'Sources & further reading' }
+      else if (b.kind === 'body') { kind = 'assessment'; title = 'Overview' }
+      return { title, content: body, kind }
+    })
+    const kept = sections.filter((s) => s.content.trim())
+    if (kept.length) return kept
+    // Tags existed but bodies empty — fall through to heading split.
   }
   // Fallback: split by markdown headings
   const lines = content.split(/\r?\n/)
@@ -128,7 +139,7 @@ function SourceCards({ content }: { content: string }) {
       <div className="grid gap-2">
         {cards.map((source) => (
           <a key={source.url} href={source.url} target="_blank" rel="noreferrer" className="flex min-h-[56px] items-center gap-3 rounded-xl border border-line bg-card p-2.5 shadow-sm transition hover:-translate-y-px hover:border-accent hover:shadow-md dark:border-[#2c4039] dark:bg-[#192622]">
-            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-clay text-[13px] font-bold text-white" aria-hidden="true">{source.domain.slice(0, 1).toUpperCase()}</span>
+            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-accent text-[13px] font-bold text-white dark:bg-[#257d6e]" aria-hidden="true">{source.domain.slice(0, 1).toUpperCase()}</span>
             <span className="flex min-w-0 flex-col gap-0.5">
               <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-faint dark:text-[#6e857e]">{source.domain}</span>
               <span className="truncate text-[13px] font-bold text-accent dark:text-accent-bright">{source.title}</span>
@@ -145,12 +156,12 @@ const sectionConfig: Record<MarkdownSectionKind, { style: string; icon: typeof H
   assessment: { style: 'border-line bg-card dark:border-[#2c4039] dark:bg-[#192622]', icon: HeartPulse, badge: 'bg-accent text-white dark:bg-[#257d6e] dark:text-white' },
   selfcare: { style: 'border-accent-border bg-accent-soft/70 dark:border-[#296659] dark:bg-[#21302b]', icon: ListChecks, badge: 'bg-accent text-white dark:bg-[#257d6e] dark:text-white' },
   urgent: { style: 'border-amber-200 bg-amber-50 dark:border-[#8a6a10] dark:bg-[#2b2410]', icon: ShieldAlert, badge: 'bg-amber-500 text-white' },
-  sources: { style: 'border-line bg-card-subtle dark:border-[#22332c] dark:bg-[#21302b]/50', icon: BookOpen, badge: 'bg-clay text-white' },
+  sources: { style: 'border-line bg-card-subtle dark:border-[#22332c] dark:bg-[#21302b]/50', icon: BookOpen, badge: 'bg-accent text-white dark:bg-[#257d6e] dark:text-white' },
   body: { style: 'border-line bg-card dark:border-[#2c4039] dark:bg-[#192622]', icon: Info, badge: 'bg-faint text-white' },
 }
 
 export function MarkdownResponse({ content }: { content: string }) {
-  const sections = splitSections(stripSectionTags(content))
+  const sections = splitSections(content)
   return (
     <div className="grid min-w-0 gap-3">
       {sections.map((section, index) => {

@@ -10,6 +10,8 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY package.json tsconfig.json ./
 COPY src ./src
+COPY assets ./assets
+COPY scripts ./scripts
 RUN apk add --no-cache curl \
   && adduser -D -u 10001 medik && chown -R medik:medik /app
 USER medik

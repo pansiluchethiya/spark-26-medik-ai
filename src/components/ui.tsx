@@ -103,42 +103,34 @@ export function ModalHeader({
   titleId,
   subtitle,
   onClose,
-  dark = false,
 }: {
   kicker?: string
   title: string
   titleId?: string
   subtitle?: string
   onClose: () => void
-  dark?: boolean
 }) {
   return (
     <div
-      className={cn(
-        'flex shrink-0 items-start justify-between gap-4 border-b px-5 pb-4 pt-5 sm:px-6',
-        dark ? 'border-[#1e293b]' : 'border-line-soft dark:border-[#22332c]',
-      )}
+      className="flex shrink-0 items-start justify-between gap-4 border-b border-line-soft px-5 pb-4 pt-5 sm:px-6 dark:border-[#22332c]"
     >
       <div className="min-w-0">
         {kicker && (
-          <p className={cn('text-[10px] font-extrabold uppercase tracking-[0.14em]', dark ? 'text-[#38bdf8]' : 'text-accent dark:text-accent-bright')}>
+          <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-accent dark:text-accent-bright">
             {kicker}
           </p>
         )}
         <h2 id={titleId} className="mt-1 text-xl font-bold">
           {title}
         </h2>
-        {subtitle && <p className={cn('mt-1 text-[13px] leading-relaxed', dark ? 'text-[#94a3b8]' : 'text-muted dark:text-[#9eb5ae]')}>{subtitle}</p>}
+        {subtitle && <p className="mt-1 text-[13px] leading-relaxed text-muted dark:text-[#9eb5ae]">{subtitle}</p>}
       </div>
       <button
         type="button"
         aria-label="Close dialog"
         onClick={onClose}
         className={cn(
-          'inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition',
-          dark
-            ? 'border-transparent text-[#94a3b8] hover:bg-[#1e293b] hover:text-white'
-            : 'border-line bg-card-subtle text-muted hover:bg-accent hover:text-white dark:border-[#2c4039] dark:bg-[#21302b]',
+          'inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line bg-card-subtle text-muted transition hover:bg-accent-soft hover:text-accent dark:border-[#2c4039] dark:bg-[#21302b] dark:hover:text-accent-bright',
         )}
       >
         <X size={16} aria-hidden="true" />

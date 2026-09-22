@@ -1,7 +1,12 @@
 import { Router, type NextFunction, type Request, type Response } from 'express'
+import { fileURLToPath } from 'node:url'
+import { dirname, join } from 'node:path'
 import { requireAdmin } from '../admin/auth.ts'
 import { adminPage } from '../admin/page.ts'
+import { adminManifest, adminServiceWorker } from '../admin/pwa.ts'
 import { snapshot, systemStats } from '../admin/store.ts'
+
+const assetsDir = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'assets')
 
 export const adminRouter = Router()
 
@@ -20,6 +25,22 @@ adminRouter.use((_req: Request, res: Response, next: NextFunction) => {
   res.removeHeader('Origin-Agent-Cluster')
   next()
 })
+
+// Public PWA files (no auth — they contain no sensitive data, and the
+// manifest/icons/SW must be fetchable for installability checks).
+adminRouter.get('/manifest.webmanifest', (_req: Request, res: Response) => {
+  res.json(adminManifest())
+})
+
+adminRouter.get('/sw.js', (_req: Request, res: Response) => {
+  res.type('js').setHeader('Service-Worker-Allowed', '/admin/').send(adminServiceWorker())
+})
+
+for (const icon of ['icon-192.png', 'icon-512.png', 'maskable-512.png']) {
+  adminRouter.get(`/${icon}`, (_req: Request, res: Response) => {
+    res.sendFile(join(assetsDir, icon))
+  })
+}
 
 adminRouter.use(requireAdmin)
 

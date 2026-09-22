@@ -5,6 +5,13 @@ export function adminPage(): string {
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Medik AI — Admin</title>
+<meta name="theme-color" content="#0e1513" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Medik Admin" />
+<link rel="manifest" href="/admin/manifest.webmanifest" />
+<link rel="apple-touch-icon" href="/admin/icon-192.png" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%233ddc97'/%3E%3Ctext x='16' y='23' font-size='18' text-anchor='middle' fill='%230e1513' font-family='system-ui' font-weight='bold'%3EM%3C/text%3E%3C/svg%3E" />
 <style>
   :root { color-scheme: dark; --bg:#0e1513; --card:#182220; --line:#2b3d37; --ink:#e8f0ee; --mut:#9eb5ae; --acc:#3ddc97; --warn:#f5b453; --bad:#f0726a; }
@@ -88,6 +95,7 @@ async function tick() {
   } catch (e) { document.getElementById('updated').textContent = 'error: ' + e.message; }
 }
 const card = (label, value) => '<div class="card"><small>' + label + '</small><strong>' + esc(value) + '</strong></div>';
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/admin/sw.js').catch(() => {}); }
 tick(); setInterval(tick, 3000);
 </script>
 </body>

@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@creativoma/liquid-glass": "^1.5.0",
     "dotenv": "^17.4.2",
     "lucide-react": "^1.45.0",
     "react": "^19.2.8",

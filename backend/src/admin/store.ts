@@ -26,7 +26,16 @@ let rateLimitedResponses = 0
 let unauthorizedResponses = 0
 
 // Paths excluded from the log (healthcheck + dashboard polling noise).
-const SKIP_PATHS = new Set(['/health', '/api/health', '/admin/api/stats'])
+const SKIP_PATHS = new Set([
+  '/health',
+  '/api/health',
+  '/admin/api/stats',
+  '/admin/manifest.webmanifest',
+  '/admin/sw.js',
+  '/admin/icon-192.png',
+  '/admin/icon-512.png',
+  '/admin/maskable-512.png',
+])
 
 export function shouldLog(path: string) {
   return !SKIP_PATHS.has(path)
