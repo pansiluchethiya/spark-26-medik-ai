@@ -56,6 +56,10 @@ jobs:
           unzip -q cmdtools.zip -d "$ANDROID_HOME/cmdline-tools"
           mv "$ANDROID_HOME/cmdline-tools/cmdline-tools" "$ANDROID_HOME/cmdline-tools/latest"
           rm cmdtools.zip
+          # Bubblewrap validates the SDK by the presence of a top-level
+          # `tools/` or `bin/` dir (legacy layout) — link the real binaries.
+          mkdir -p "$ANDROID_HOME/bin"
+          for f in "$ANDROID_HOME"/cmdline-tools/latest/bin/*; do ln -sf "$f" "$ANDROID_HOME/bin/"; done
           export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
           {
             echo "ANDROID_HOME=$ANDROID_HOME"
