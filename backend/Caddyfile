@@ -17,6 +17,11 @@
 		reverse_proxy backend:4100
 	}
 
+	# Admin dashboard (Basic Auth enforced by the backend)
+	handle /admin* {
+		reverse_proxy backend:4100
+	}
+
 	# Anything else: identify the service instead of 404ing silently
 	handle {
 		respond "medik-ai-backend: use /api/health or POST /api/v1/ai/chat" 200
