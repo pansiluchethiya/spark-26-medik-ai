@@ -2,6 +2,7 @@ import ReactMarkdown from 'react-markdown'
 import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import { cn } from '../lib/cn'
+import { normalizeSections, splitNormalized, stripSectionTags } from '../lib/sections'
 import { HeartPulse, ShieldAlert, ListChecks, BookOpen, Info } from 'lucide-react'
 
 type MarkdownSectionKind = 'assessment' | 'urgent' | 'selfcare' | 'sources' | 'body'
@@ -17,33 +18,21 @@ function sectionKindFromTitle(title: string): MarkdownSectionKind {
   return 'body'
 }
 
-const EXPLICIT_TAG = /\[SECTION:(assessment|urgent|selfcare|sources|actions|body)\]/gi
-
-export function splitSections(content: string): MarkdownSection[] {
-  // Normalize: models often emit **[SECTION:x]** or inline tags. Unwrap bold
-  // markers so tags are plain, then split on tag occurrences anywhere.
-  const normalized = content.replace(/\*\*(\[SECTION:[a-z]+\])\*\*/gi, '$1')
-  const boundaries: Array<{ kind: string; index: number; end: number }> = []
-  for (const match of normalized.matchAll(EXPLICIT_TAG)) {
-    boundaries.push({ kind: match[1].toLowerCase(), index: match.index ?? 0, end: (match.index ?? 0) + match[0].length })
-  }
-  if (boundaries.length) {
-    const sections = boundaries.map((b, i) => {
-      const rawBody = normalized.slice(b.end, i + 1 < boundaries.length ? boundaries[i + 1].index : undefined)
-      // Drop any leftover raw tags that slipped inside a body.
-      const body = rawBody.replace(EXPLICIT_TAG, '').trim()
-      let kind: MarkdownSectionKind = 'body'
-      let title = 'Overview'
-      if (b.kind === 'assessment') { kind = 'assessment'; title = 'What this could be' }
-      else if (b.kind === 'urgent') { kind = 'urgent'; title = 'When to seek care quickly' }
-      else if (b.kind === 'selfcare' || b.kind === 'actions') { kind = 'selfcare'; title = 'What you can do now' }
-      else if (b.kind === 'sources') { kind = 'sources'; title = 'Sources & further reading' }
-      else if (b.kind === 'body') { kind = 'assessment'; title = 'Overview' }
-      return { title, content: body, kind }
-    })
-    const kept = sections.filter((s) => s.content.trim())
-    if (kept.length) return kept
-    // Tags existed but bodies empty — fall through to heading split.
+function splitSections(content: string): MarkdownSection[] {
+  // Normalize tolerant tag variants ([SECTION: x], **[SECTION:x]**, inline)
+  // then split on tag lines — every section always parses.
+  const normalized = normalizeSections(content)
+  const blocks = splitNormalized(normalized)
+  if (blocks.length) {
+    const toSection = (kind: string, body: string): MarkdownSection => {
+      const raw = kind.toLowerCase()
+      if (raw === 'assessment') return { title: 'What this could be', content: body, kind: 'assessment' }
+      if (raw === 'urgent') return { title: 'When to seek care quickly', content: body, kind: 'urgent' }
+      if (raw === 'selfcare' || raw === 'actions') return { title: 'What you can do now', content: body, kind: 'selfcare' }
+      if (raw === 'sources') return { title: 'Sources & further reading', content: body, kind: 'sources' }
+      return { title: 'Overview', content: body, kind: 'body' }
+    }
+    return blocks.map((b) => toSection(b.kind, stripSectionTags(b.body)))
   }
   // Fallback: split by markdown headings
   const lines = content.split(/\r?\n/)
@@ -161,7 +150,7 @@ const sectionConfig: Record<MarkdownSectionKind, { style: string; icon: typeof H
 }
 
 export function MarkdownResponse({ content }: { content: string }) {
-  const sections = splitSections(content)
+  const sections = splitSections(stripSectionTags(content))
   return (
     <div className="grid min-w-0 gap-3">
       {sections.map((section, index) => {

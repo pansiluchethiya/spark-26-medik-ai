@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ChatMessage } from '../types/app'
 import { MarkdownResponse } from './MarkdownResponse'
-import { ExternalLink, Globe, Pencil, Volume2, Square, FastForward, Plus, Copy, Check, Sparkles } from 'lucide-react'
+import { AlertTriangle, ExternalLink, Globe, Pencil, Volume2, Square, FastForward, Plus, Copy, Check, Sparkles } from 'lucide-react'
 import { FollowUpBar, MatchMeter, TrustFooter } from './chat/messageExtras'
 import { extractMatches } from '../lib/matches'
+import { normalizeSections, splitNormalized } from '../lib/sections'
+import { GlassBubble } from './GlassBubble'
 import { cn } from '../lib/cn'
 import { speakText, stopSpeech } from '../lib/tts'
 import type { TtsVoiceId } from '../lib/tts'
@@ -26,6 +28,44 @@ function deriveFollowUps(message: ChatMessage): string[] {
   return Array.from(new Set(chips)).slice(0, 3)
 }
 
+// Floating chips pinned to an assistant answer, driven by THAT answer's
+// real data (top match, red-flag section, verified source count).
+// Decorative duplicates of in-card content → hidden from screen readers.
+function AnswerFloaters({ message }: { message: ChatMessage }) {
+  const matches = extractMatches(message.content)
+  const top = matches[0]
+  const kinds = new Set(splitNormalized(normalizeSections(message.content)).map((b) => b.kind))
+  const sourceCount = message.sources?.length ?? 0
+  if (!top && !kinds.has('urgent') && sourceCount === 0) return null
+  return (
+    <>
+      {top && (
+        <div className="pointer-events-none absolute -left-3 top-12 hidden w-44 -translate-x-full xl:block" aria-hidden="true">
+          <div className="animate-float rounded-2xl border border-line/70 bg-card/70 p-3 text-left shadow-md backdrop-blur-xl dark:border-[#2c4039]/70 dark:bg-[#192622]/70">
+            <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-accent dark:text-accent-bright">Top match</p>
+            <p className="mt-0.5 truncate text-[12px] font-bold">{top.label}</p>
+            <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-line-soft dark:bg-[#0f1a17]">
+              <div className="h-full rounded-full bg-accent dark:bg-accent-bright" style={{ width: `${top.score}%` }} />
+            </div>
+            <p className="mt-1 text-[11px] font-extrabold tabular-nums text-accent dark:text-accent-bright">{top.score}%</p>
+          </div>
+        </div>
+      )}
+      {(kinds.has('urgent') || sourceCount > 0) && (
+        <div className="pointer-events-none absolute -right-3 top-16 hidden w-44 translate-x-full xl:block" aria-hidden="true">
+          <div className="animate-float-slow rounded-2xl border border-line/70 bg-card/70 p-3 text-left shadow-md backdrop-blur-xl dark:border-[#2c4039]/70 dark:bg-[#192622]/70">
+            {kinds.has('urgent') && (
+              <p className="flex items-center gap-1.5 text-[12px] font-bold"><span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#dc2626]/10 text-[#dc2626]"><AlertTriangle size={13} /></span>Red flags checked</p>
+            )}
+            {sourceCount > 0 && (
+              <p className={cn('flex items-center gap-1.5 text-[12px] font-bold', kinds.has('urgent') && 'mt-1.5')}><span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-accent-soft text-accent dark:bg-[#21302b] dark:text-accent-bright"><Globe size={13} /></span>{sourceCount} verified {sourceCount === 1 ? 'source' : 'sources'}</p>
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
 export function ChatMessages({
   messages, isSending, ttsVoice = 'auto', onEditMessage, onRegenerate, onSelectFollowUp,
 }: {
@@ -70,17 +110,23 @@ export function ChatMessages({
         const followUps = isLastAssistant && !isSending && onSelectFollowUp ? deriveFollowUps(message) : []
         const sourceCount = message.sources?.length ?? sources.length
         const isSpeaking = speakingIndex === index
+        // Older bubbles in long chats render without the SVG filter
+        // to keep scrolling smooth; newest 25 keep full liquid glass.
+        const glassDisabled = index < messages.length - 25
 
         return (
-          <article
+          <GlassBubble
             key={`${message.role}-${index}`}
+            kind={isUser ? 'user' : 'assistant'}
+            disabled={glassDisabled}
             className={cn(
-              'animate-rise min-w-0 max-w-full rounded-2xl border text-[15px] leading-relaxed shadow-md backdrop-blur-xl saturate-150 sm:p-[18px_22px] p-4',
+              'animate-rise relative text-[15px] leading-relaxed',
               isUser
-                ? 'ml-auto w-fit max-w-[92%] rounded-br-md border-accent-border/60 bg-accent-soft/70 text-ink sm:max-w-[85%] dark:border-[#296659]/60 dark:bg-[#21302b]/70 dark:text-[#e8f0ee]'
-                : 'w-full rounded-bl-md border-line/80 bg-card/80 text-ink dark:border-[#2c4039]/80 dark:bg-[#192622]/80 dark:text-[#e8f0ee]',
+                ? 'ml-auto w-fit max-w-[92%] rounded-br-md border-clay-border sm:max-w-[85%]'
+                : 'w-full rounded-bl-md border-line dark:border-[#2c4039]',
             )}
           >
+            {message.role === 'assistant' && message.content.trim() && <AnswerFloaters message={message} />}
             {message.role === 'assistant' && (
               <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-line-soft pb-2.5 dark:border-[#22332c]">
                 <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.06em] text-accent dark:text-accent-bright">
@@ -141,7 +187,7 @@ export function ChatMessages({
             {isLastAssistant && !isSending && (
               <p className="mt-2 flex items-center gap-1 text-[10px] text-faint dark:text-[#6e857e]"><Sparkles size={10} /> AI information only — not a medical diagnosis</p>
             )}
-          </article>
+          </GlassBubble>
         )
       })}
 
