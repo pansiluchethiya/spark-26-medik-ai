@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Clock3, MessageSquare, Search, Trash2, X } from 'lucide-react'
+import { Clock3, MessageSquare, Search, Settings, Trash2, X } from 'lucide-react'
 import type { ChatSession } from '../types/app'
 
 export function ChatHistoryDrawer({
@@ -35,6 +35,7 @@ export function ChatHistoryPanel({
   onDelete,
   onNew,
   onClose,
+  onSettings,
 }: {
   sessions: ChatSession[]
   activeId: string
@@ -42,6 +43,7 @@ export function ChatHistoryPanel({
   onDelete: (id: string) => void
   onNew: () => void
   onClose?: () => void
+  onSettings?: () => void
 }) {
   const [search, setSearch] = useState('')
   const filtered = useMemo(() => {
@@ -65,7 +67,7 @@ export function ChatHistoryPanel({
           <h2 className="text-[15px] font-extrabold">History</h2>
         </div>
         {onClose && (
-          <button type="button" aria-label="Close history" onClick={onClose} className="grid h-8 w-8 place-items-center rounded-lg border border-line bg-card-subtle dark:border-[#2c4039] dark:bg-[#21302b]"><X size={14} /></button>
+          <button type="button" aria-label="Collapse sidebar" title="Collapse sidebar" onClick={onClose} className="grid h-8 w-8 place-items-center rounded-lg border border-line bg-card-subtle text-muted transition hover:bg-accent-soft hover:text-accent dark:border-[#2c4039] dark:bg-[#21302b] dark:text-[#9eb5ae] dark:hover:text-accent-bright"><X size={14} /></button>
         )}
       </div>
 
@@ -93,6 +95,13 @@ export function ChatHistoryPanel({
           )) : <p className="py-8 text-center text-sm text-faint">No conversations match.</p>}
         </div>
         <p className="border-t border-line-soft px-3 py-2 text-center text-[11px] text-faint dark:border-[#22332c]">Stored locally — no database.</p>
+        {onSettings && (
+          <div className="border-t border-line-soft p-3 dark:border-[#22332c]">
+            <button type="button" onClick={onSettings} className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-line bg-card-subtle px-3 py-2 text-[13px] font-bold text-muted transition hover:border-accent hover:text-accent dark:border-[#2c4039] dark:bg-[#21302b] dark:text-[#9eb5ae] dark:hover:text-accent-bright">
+              <Settings size={14} /> Settings
+            </button>
+          </div>
+        )}
     </div>
   )
 }

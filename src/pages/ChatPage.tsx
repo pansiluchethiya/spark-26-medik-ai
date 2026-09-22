@@ -13,6 +13,8 @@ import { speakText } from '../lib/tts'
 import type { ChatMessage, ChatSession, LocalPreferences } from '../types/app'
 import { preferencesKey } from '../lib/store/keys'
 
+const flyoutKey = 'medik-flyout-open'
+
 function readPreferences(): LocalPreferences {
   try {
     const raw = localStorage.getItem(preferencesKey)
@@ -36,7 +38,19 @@ export default function ChatPage() {
   const [error, setError] = useState('')
   const [preferences, setPreferences] = useState<LocalPreferences>(() => readPreferences())
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const [flyoutOpen, setFlyoutOpen] = useState(() => typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches)
+  const [flyoutOpen, setFlyoutOpen] = useState(() => {
+    try {
+      const stored = localStorage.getItem(flyoutKey)
+      if (stored !== null) return stored === '1'
+    } catch { /* private mode */ }
+    return typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches
+  })
+  const toggleFlyout = () => {
+    setFlyoutOpen((v) => {
+      try { localStorage.setItem(flyoutKey, v ? '0' : '1') } catch { /* private mode */ }
+      return !v
+    })
+  }
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
 
@@ -197,7 +211,7 @@ export default function ChatPage() {
         <button type="button" onClick={startNewChat} title="New chat" aria-label="New chat" className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-card-subtle text-muted transition hover:border-accent hover:text-accent dark:border-[#2c4039] dark:bg-[#21302b] dark:text-[#9eb5ae] dark:hover:text-white">
           <Plus size={18} />
         </button>
-        <button type="button" onClick={() => setFlyoutOpen((v) => !v)} title="Chat history" aria-label="Chat history" aria-pressed={flyoutOpen} className={`grid h-10 w-10 place-items-center rounded-xl border transition ${flyoutOpen ? 'border-accent bg-accent-soft text-accent dark:border-[#296659] dark:bg-[#21302b] dark:text-white' : 'border-line bg-card-subtle text-muted hover:border-accent hover:text-accent dark:border-[#2c4039] dark:bg-[#21302b] dark:text-[#9eb5ae] dark:hover:text-white'}`}>
+        <button type="button" onClick={toggleFlyout} title="Chat history" aria-label="Chat history" aria-pressed={flyoutOpen} className={`grid h-10 w-10 place-items-center rounded-xl border transition ${flyoutOpen ? 'border-accent bg-accent-soft text-accent dark:border-[#296659] dark:bg-[#21302b] dark:text-white' : 'border-line bg-card-subtle text-muted hover:border-accent hover:text-accent dark:border-[#2c4039] dark:bg-[#21302b] dark:text-[#9eb5ae] dark:hover:text-white'}`}>
           <PanelLeft size={18} />
         </button>
         <div className="mt-auto flex flex-col items-center gap-2">
@@ -210,7 +224,7 @@ export default function ChatPage() {
       {/* Desktop history flyout */}
       {flyoutOpen && (
         <aside className="hidden h-full w-[320px] shrink-0 flex-col border-r border-line bg-card animate-drawer lg:flex dark:border-[#2c4039] dark:bg-[#192622]">
-          <ChatHistoryPanel sessions={chatSessions} activeId={activeSessionId} onSelect={selectChat} onDelete={deleteChatSession} onNew={startNewChat} onClose={() => setFlyoutOpen(false)} />
+          <ChatHistoryPanel sessions={chatSessions} activeId={activeSessionId} onSelect={selectChat} onDelete={deleteChatSession} onNew={startNewChat} onClose={toggleFlyout} onSettings={() => setSettingsOpen(true)} />
         </aside>
       )}
 
