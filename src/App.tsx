@@ -6,6 +6,7 @@ import { ChatMessages } from './components/ChatMessages'
 import { ChatHistoryDrawer } from './components/ChatHistoryDrawer'
 import { SettingsModal } from './components/SettingsModal'
 import { readAssistantStream } from './lib/stream'
+import { apiHeaders, apiUrl } from './lib/api'
 import { newSession, readChatSessions, saveChatSessions } from './lib/store/chat'
 import { speakText } from './lib/tts'
 import type { ChatMessage, ChatSession, LocalPreferences } from './types/app'
@@ -113,9 +114,9 @@ export default function App() {
     try {
       const controller = new AbortController()
       abortRef.current = controller
-      const response = await fetch('/api/v1/ai/chat', {
+      const response = await fetch(apiUrl('/api/v1/ai/chat'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: apiHeaders({ 'Content-Type': 'application/json' }),
         signal: controller.signal,
         body: JSON.stringify({ messages: apiMessages, stream: true }),
       })

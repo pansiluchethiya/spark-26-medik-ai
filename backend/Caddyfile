@@ -1,0 +1,24 @@
+# Caddy front door for the Medik AI backend (OCI server 152.67.162.246).
+# - Public :80 → backend:4100 (API only; frontend is hosted on Cloudflare Pages)
+# - Access + error logs go to stdout → `docker logs medik-ai-caddy` (monitoring)
+# - When a domain arrives: replace `:80` with the domain name and Caddy
+#   will provision TLS automatically.
+:80 {
+	log {
+		output stdout
+		format console
+	}
+
+	# Backend health (also used as a lightweight monitor endpoint)
+	handle /health {
+		reverse_proxy backend:4100
+	}
+	handle /api/* {
+		reverse_proxy backend:4100
+	}
+
+	# Anything else: identify the service instead of 404ing silently
+	handle {
+		respond "medik-ai-backend: use /api/health or POST /api/v1/ai/chat" 200
+	}
+}

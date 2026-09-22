@@ -34,20 +34,3 @@ export function safePublicUrl(value: string) {
     return null
   }
 }
-
-export function sendJson(response: import('node:http').ServerResponse, status: number, body: unknown) {
-  response.writeHead(status, { 'Content-Type': 'application/json' })
-  response.end(JSON.stringify(body))
-}
-
-export function readBody(request: import('node:http').IncomingMessage): Promise<string> {
-  return new Promise((resolve, reject) => {
-    let body = ''
-    request.on('data', (chunk: Buffer) => {
-      body += chunk.toString()
-      if (body.length > 1_000_000) reject(new Error('Request body is too large'))
-    })
-    request.on('end', () => resolve(body))
-    request.on('error', reject)
-  })
-}

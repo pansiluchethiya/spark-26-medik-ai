@@ -1,4 +1,4 @@
-import type { AgentMessage } from '../types.ts'
+import type { AgentMessage } from '../lib/types.ts'
 import process from 'node:process'
 import { providerFetch } from './infra.ts'
 

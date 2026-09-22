@@ -1,12 +1,12 @@
-import type { AgentMessage } from '../types.ts'
+import type { AgentMessage } from '../lib/types.ts'
 import process from 'node:process'
 import { emitWarning } from './events.ts'
-import { streamGroqAgent } from './providers_groq.ts'
+import { streamGroqAgent, type SseWriter } from './providers_groq.ts'
 import { tryGemini } from './providers_rest.ts'
 import { generateLocalFallbackResponse } from './fallback.ts'
 
 // Fast failover: Groq -> Gemini -> local fallback only. Others disabled for speed.
-export async function streamAssistant(messages: AgentMessage[], response: import('node:http').ServerResponse, webResearch = true): Promise<boolean> {
+export async function streamAssistant(messages: AgentMessage[], response: SseWriter, webResearch = true): Promise<boolean> {
   const groqApiKey = process.env.GROQ_API_KEY ?? ''
   if (groqApiKey) {
     try { return await streamGroqAgent(messages, response, webResearch) }
@@ -19,9 +19,9 @@ export async function streamAssistant(messages: AgentMessage[], response: import
   return await streamTextResponse(fallbackText, response, 'Medik Triage Engine', typeof lastUserMsg === 'string' ? lastUserMsg : '')
 }
 
-async function streamTextResponse(text: string, response: import('node:http').ServerResponse, providerName = 'Local AI Engine', userPrompt = '') {
-  if (!response.headersSent) response.writeHead(200, { 'Content-Type': 'text/event-stream; charset=utf-8', 'Cache-Control': 'no-cache', Connection: 'keep-alive' })
-  // No agent steps emission for speed and cleaner UX (removed per request)
+async function streamTextResponse(text: string, response: SseWriter, providerName = 'Local AI Engine', userPrompt = '') {
+  void userPrompt
+  if (!response.headersSent) response.writeHead?.(200, { 'Content-Type': 'text/event-stream; charset=utf-8', 'Cache-Control': 'no-cache', Connection: 'keep-alive' })
   if (providerName === 'Medik Triage Engine') emitWarning(response, 'Using local safety response (providers unavailable).')
   const words = text.split(/(?<=\s+)/)
   for (const word of words) {

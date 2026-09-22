@@ -1,0 +1,28 @@
+{
+  "name": "medik-ai-backend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Medik Triage AI backend — Express server for /api/v1/ai/chat (migrated off Cloudflare Functions)",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node node_modules/tsx/dist/cli.mjs src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.1.0",
+    "morgan": "^1.10.1",
+    "tsx": "^4.23.3"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^4.17.23",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^24.13.4",
+    "typescript": "~5.9.3"
+  }
+}

@@ -1,20 +1,28 @@
-import type { AgentMessage, ToolCall } from '../types.ts'
+import type { AgentMessage, ToolCall } from '../lib/types.ts'
 import process from 'node:process'
 import { executeResearchTool } from '../tools/executor.ts'
 import { researchToolSchemas } from '../tools/schemas.ts'
 import { providerFetch } from './infra.ts'
 
-const groqModel = process.env.GROQ_MODEL ?? 'openai/gpt-oss-120b'
+export type SseWriter = {
+  write(chunk: string): unknown
+  end(chunk?: string): unknown
+  headersSent?: boolean
+  writableEnded?: boolean
+  writeHead?(status: number, headers: Record<string, string>): unknown
+}
+
+const groqModel = () => process.env.GROQ_MODEL ?? 'openai/gpt-oss-120b'
 
 // Fast Groq agent: max 2 rounds, 1 web_search max, early exit on content.
-export async function streamGroqAgent(messages: AgentMessage[], response: import('node:http').ServerResponse, webResearch: boolean) {
-  if (!response.headersSent) response.writeHead(200, { 'Content-Type': 'text/event-stream; charset=utf-8', 'Cache-Control': 'no-cache', Connection: 'keep-alive' })
+export async function streamGroqAgent(messages: AgentMessage[], response: SseWriter, webResearch: boolean) {
+  if (!response.headersSent) response.writeHead?.(200, { 'Content-Type': 'text/event-stream; charset=utf-8', 'Cache-Control': 'no-cache', Connection: 'keep-alive' })
   const conversation = [...messages]
   let answer = ''
   let toolsUsed = 0
 
   for (let round = 0; round < 2; round += 1) {
-    const body: Record<string, unknown> = { model: groqModel, temperature: 0.2, stream: true, messages: conversation, max_tokens: 700 }
+    const body: Record<string, unknown> = { model: groqModel(), temperature: 0.2, stream: true, messages: conversation, max_tokens: 700 }
     if (webResearch && toolsUsed === 0) body.tools = researchToolSchemas
     else body.tool_choice = 'none'
     const result = await providerFetch('Groq', 'https://api.groq.com/openai/v1/chat/completions', {

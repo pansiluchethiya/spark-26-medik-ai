@@ -1,4 +1,4 @@
-import { cleanText, htmlToText, safePublicUrl } from '../helpers.ts'
+import { cleanText, htmlToText, safePublicUrl } from '../lib/helpers.ts'
 
 export async function webSearch(query: string) {
   const searchQuery = cleanText(query, 120)

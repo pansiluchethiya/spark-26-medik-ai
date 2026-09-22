@@ -1,0 +1,52 @@
+# Medik AI backend + Caddy reverse proxy (OCI).
+# Usage on the server (/opt/medik-ai):
+#   cp backend/.env.example .env   # fill in real keys, chmod 600 .env
+#   docker compose up -d --build
+#   docker compose logs -f
+services:
+  backend:
+    build: .
+    image: medik-ai-backend:latest
+    container_name: medik-ai-backend
+    restart: unless-stopped
+    env_file: .env
+    expose:
+      - "4100"
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://127.0.0.1:4100/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: medik-ai-caddy
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_started
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  caddy_data:
+  caddy_config:

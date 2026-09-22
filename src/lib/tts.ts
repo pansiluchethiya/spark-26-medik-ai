@@ -1,3 +1,5 @@
+import { apiHeaders, apiUrl } from './api'
+
 export function sanitizeTextForSpeech(markdown: string): string {
   if (!markdown) return ''
   return markdown
@@ -36,8 +38,8 @@ export async function speakText(options: {
 
   // Try server TTS if available (optional, not required for Pages)
   try {
-    const res = await fetch('/api/v1/ai/tts', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+    const res = await fetch(apiUrl('/api/v1/ai/tts'), {
+      method: 'POST', headers: apiHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ text: spoken, voice: options.voice ?? 'auto' }),
     })
     if (res.ok) {
