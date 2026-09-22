@@ -1,0 +1,71 @@
+# Android production APK — built LOCALLY on the runner (no EAS cloud).
+# Trigger: push a tag like `mobile-v1.0.1`, or manual dispatch.
+# Result: APK attached to the GitHub Release for that tag.
+#
+# REQUIRED repo secret (Settings → Secrets → Actions):
+#   EXPO_TOKEN — Expo access token (expo.dev → Account Settings → Access Tokens).
+#   Used only to fetch this project's signing credentials; the compile
+#   itself runs on this runner via `eas build --local`.
+#
+# NOTE: release signing identity = the EAS remote keystore created for the
+# first cloud build. Keep using this workflow (or EAS) for every release —
+# switching keys forces users to uninstall/reinstall.
+
+name: Android release (APK)
+
+on:
+  push:
+    tags:
+      - 'mobile-v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Accept SDK licenses
+        run: yes | sdkmanager --licenses > /dev/null
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prebuild native project
+        run: npx expo prebuild --platform android --clean --non-interactive
+
+      - name: Build release APK locally
+        run: npx -y eas-cli@latest build --local --platform android --profile production-apk --non-interactive --output "Medik-${{ github.ref_name }}.apk"
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Attach APK to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ github.ref_name }}"
+          gh release view "$TAG" > /dev/null 2>&1 || gh release create "$TAG" --title "Medik $TAG" --notes "Production Android APK (release-signed)."
+          gh release upload "$TAG" "Medik-$TAG.apk" --clobber
