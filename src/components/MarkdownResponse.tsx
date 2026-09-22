@@ -150,7 +150,9 @@ const sectionConfig: Record<MarkdownSectionKind, { style: string; icon: typeof H
 }
 
 export function MarkdownResponse({ content }: { content: string }) {
-  const sections = splitSections(stripSectionTags(content))
+  // NOTE: do NOT strip tags before splitting — splitSections needs them
+  // as boundaries (it already strips leftovers from each body).
+  const sections = splitSections(content)
   return (
     <div className="grid min-w-0 gap-3">
       {sections.map((section, index) => {

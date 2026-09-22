@@ -34,7 +34,11 @@ export function GlassBubble({ kind, disabled = false, className, children }: {
       displacementScale={kind === 'user' ? 55 : 75}
       turbulenceSeed={kind === 'user' ? 3 : 7}
       tintColor={tintColor}
-      className={cn('min-w-0 max-w-full rounded-2xl border shadow-sm', className)}
+// NOTE: the lib sets overflow:hidden on the wrapper, which zeroes the flex
+// automatic minimum size — without shrink-0 every bubble would shrink-fit
+// the visible scroll area instead of overflowing it (clipped messages).
+// min-h-fit is a second guard for non-flex contexts.
+      className={cn('min-w-0 max-w-full rounded-2xl border shadow-sm shrink-0 min-h-fit', className)}
       contentClassName="min-w-0 p-4 text-ink sm:p-[18px_22px] dark:text-[#e8f0ee]"
     >
       {children}
