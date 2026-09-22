@@ -9,9 +9,11 @@ import { deflateSync } from 'node:zlib'
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const outDir = join(root, 'public', 'icons')
 
-const BG = [70, 191, 160, 255] // lighter green #46bfa0
-const PLUS = [244, 250, 247, 255] // off-white #f4faf7
-const EDGE = [20, 88, 75, 255] // deep green hairline #14584b
+// Design: darker-green rounded square, white medical cross,
+// hairline lighter outline just inside the edge.
+const BG = [29, 92, 82, 255] // deep teal #1d5c52
+const PLUS = [255, 255, 255, 255] // white #ffffff
+const EDGE = [61, 184, 159, 255] // mint hairline #3db89f
 
 const CRC_TABLE = (() => {
   const t = new Uint32Array(256)
