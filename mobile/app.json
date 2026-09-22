@@ -27,6 +27,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "97de1f89-4f85-473e-b685-2ac19f4cfdfa"
+      }
+    },
+    "owner": "pansilucs-team"
   }
 }
