@@ -89,7 +89,7 @@ jobs:
           VER="${TAG#mobile-v}"
           python3 - "$TAG" "$VER" "${{ github.run_number }}" <<'EOF'
           import json, sys
-          _, ver, run_number = sys.argv
+          _, tag, ver, run_number = sys.argv
           p = 'twa/twa-manifest.json'
           m = json.load(open(p))
           m['appVersionName'] = ver

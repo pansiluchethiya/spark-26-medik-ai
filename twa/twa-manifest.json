@@ -13,7 +13,7 @@
   "navigationDividerColorDark": "#0f1a17",
   "backgroundColor": "#fcfaf7",
   "enableNotifications": false,
-  "startUrl": "/",
+  "startUrl": "/app",
   "iconUrl": "https://medik.us.ci/icons/icon-512.png",
   "maskableIconUrl": "https://medik.us.ci/icons/icon-512.png",
   "splashScreenFadeOutDuration": 300,
