@@ -66,11 +66,15 @@ jobs:
           yes | sdkmanager --licenses > /dev/null || true
           sdkmanager "platform-tools"
 
-      - name: Point Bubblewrap at JDK + SDK
+      # Bubblewrap reads ~/.bubblewrap/config.json. Writing it directly
+      # avoids the interactive first-run wizard entirely.
+      - name: Configure Bubblewrap paths
         run: |
-          npx -y @bubblewrap/cli updateConfig \
-            --jdkPath="$JAVA_HOME" \
-            --androidSdkPath="$ANDROID_SDK_ROOT"
+          mkdir -p ~/.bubblewrap
+          printf '{"jdkPath":"%s","androidSdkPath":"%s"}' "$JAVA_HOME" "$ANDROID_SDK_ROOT" > ~/.bubblewrap/config.json
+          cat ~/.bubblewrap/config.json
+          echo
+          test -d "$JAVA_HOME/bin" && test -d "$ANDROID_SDK_ROOT/cmdline-tools" && echo "paths ok"
 
       - name: Restore release keystore
         env:
