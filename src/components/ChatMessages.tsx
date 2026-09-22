@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import type { ChatMessage } from '../types/app'
 import { MarkdownResponse } from './MarkdownResponse'
 import { ExternalLink, Globe, Pencil, Volume2, Square, FastForward, Plus, Copy, Check, Sparkles } from 'lucide-react'
-import { FollowUpBar, TrustFooter } from './chat/messageExtras'
+import { FollowUpBar, MatchMeter, TrustFooter } from './chat/messageExtras'
+import { extractMatches } from '../lib/matches'
 import { cn } from '../lib/cn'
 import { speakText, stopSpeech } from '../lib/tts'
 import type { TtsVoiceId } from '../lib/tts'
@@ -131,6 +132,9 @@ export function ChatMessages({
             )}
 
             <TrustFooter message={message} sourceCount={sourceCount} />
+            {message.role === 'assistant' && message.content.trim() && (
+              <MatchMeter matches={extractMatches(message.content)} />
+            )}
             {isLastAssistant && !isSending && (
               <FollowUpBar followUps={followUps} actionClass={actionBtn} onRegenerate={onRegenerate} onSelectFollowUp={(text) => onSelectFollowUp?.(text)} />
             )}
