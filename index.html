@@ -46,7 +46,11 @@
     <script>
       try {
         var p = JSON.parse(localStorage.getItem('medik-preferences-v1') || '{}')
-        document.documentElement.setAttribute('data-theme', p.theme || 'light')
+        var t = p.theme || 'system'
+        if (t === 'system') {
+          try { t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light' } catch (e) { t = 'light' }
+        }
+        document.documentElement.setAttribute('data-theme', t)
       } catch (e) { document.documentElement.setAttribute('data-theme', 'light') }
     </script>
     <style>

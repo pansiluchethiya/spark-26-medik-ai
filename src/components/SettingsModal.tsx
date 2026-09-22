@@ -1,4 +1,4 @@
-import { X, Sun, Moon, Volume2 } from 'lucide-react'
+import { X, Sun, Moon, Monitor, Volume2 } from 'lucide-react'
 import type { LocalPreferences } from '../types/app'
 import { getNaturalVoices } from '../lib/tts'
 import { useEffect, useState } from 'react'
@@ -18,8 +18,9 @@ export function SettingsModal({
     return () => window.speechSynthesis?.removeEventListener?.('voiceschanged', load)
   }, [])
 
-  const theme = preferences.theme ?? 'light'
-  const setTheme = (t: 'light' | 'dark') => onPreferencesChange({ ...preferences, theme: t })
+  const theme = preferences.theme ?? 'system'
+  const setTheme = (t: 'light' | 'dark' | 'system') => onPreferencesChange({ ...preferences, theme: t })
+  const themeBtn = (active: boolean) => `flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-bold ${active ? 'border-accent bg-accent text-white dark:bg-[#257d6e] dark:text-white' : 'border-line bg-card dark:border-[#2c4039] dark:bg-[#192622]'}`
 
   return (
     <div className="fixed inset-0 z-40 grid place-items-center bg-black/40 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" onMouseDown={e => { if (e.target === e.currentTarget) onClose() }}>
@@ -52,8 +53,9 @@ export function SettingsModal({
           <div className="rounded-xl border border-line bg-card-subtle p-3.5 dark:border-[#2c4039] dark:bg-[#21302b]">
             <p className="text-xs font-bold">Theme</p>
             <div className="mt-2 flex gap-2">
-              <button type="button" onClick={() => setTheme('light')} className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-bold ${theme==='light' ? 'border-accent bg-accent text-white dark:bg-[#257d6e] dark:text-white' : 'border-line bg-card dark:border-[#2c4039] dark:bg-[#192622]'}`}><Sun size={14} /> Light</button>
-              <button type="button" onClick={() => setTheme('dark')} className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-bold ${theme==='dark' ? 'border-accent bg-accent text-white dark:bg-[#257d6e] dark:text-white' : 'border-line bg-card dark:border-[#2c4039] dark:bg-[#192622]'}`}><Moon size={14} /> Dark</button>
+              <button type="button" onClick={() => setTheme('system')} className={themeBtn(theme==='system')}><Monitor size={14} /> Auto</button>
+              <button type="button" onClick={() => setTheme('light')} className={themeBtn(theme==='light')}><Sun size={14} /> Light</button>
+              <button type="button" onClick={() => setTheme('dark')} className={themeBtn(theme==='dark')}><Moon size={14} /> Dark</button>
             </div>
             <p className="mt-2 text-[11px] text-faint">Web search is always on — Medik checks current medical guidance for every question.</p>
           </div>

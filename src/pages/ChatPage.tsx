@@ -12,16 +12,17 @@ import { newSession, readChatSessions, saveChatSessions } from '../lib/store/cha
 import { speakText } from '../lib/tts'
 import type { ChatMessage, ChatSession, LocalPreferences } from '../types/app'
 import { preferencesKey } from '../lib/store/keys'
+import { applyThemeMode } from '../lib/theme'
 
 const flyoutKey = 'medik-flyout-open'
 
 function readPreferences(): LocalPreferences {
   try {
     const raw = localStorage.getItem(preferencesKey)
-    if (!raw) return { theme: 'light' }
+    if (!raw) return { theme: 'system' }
     const p = JSON.parse(raw) as LocalPreferences
     return {
-      theme: (p.theme as LocalPreferences['theme']) ?? 'light',
+      theme: (p.theme as LocalPreferences['theme']) ?? 'system',
       autoReadResponses: Boolean(p.autoReadResponses),
       ttsVoice: p.ttsVoice ?? 'auto',
     }
@@ -55,7 +56,7 @@ export default function ChatPage() {
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', preferences.theme ?? 'light')
+    applyThemeMode(preferences.theme ?? 'system')
   }, [preferences.theme])
 
   const persistMessages = (nextMessages: ChatMessage[]) => {
@@ -101,7 +102,7 @@ export default function ChatPage() {
   const updatePreferences = (next: LocalPreferences) => {
     setPreferences(next)
     localStorage.setItem(preferencesKey, JSON.stringify(next))
-    document.documentElement.setAttribute('data-theme', next.theme ?? 'light')
+    applyThemeMode(next.theme ?? 'system')
   }
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {

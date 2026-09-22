@@ -44,7 +44,7 @@ export type ChatSession = {
 }
 
 export type LocalPreferences = {
-  theme?: 'light' | 'dark'
+  theme?: 'light' | 'dark' | 'system'
   autoReadResponses?: boolean
   ttsVoice?: string
 }
