@@ -114,14 +114,15 @@ jobs:
           npx -y @bubblewrap/cli build --manifest ./twa/twa-manifest.json \
             --signingKeyPath ./twa/medik-twa.jks \
             --signingKeyAlias "${{ secrets.TWA_KEY_ALIAS }}"
-          ls -l twa/app-release-signed.apk twa/app-release-bundle.aab
+          # Artifacts land in the step's working directory (mobile/).
+          ls -l app-release-signed.apk app-release-bundle.aab
 
       - name: Attach artifacts to release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           TAG="${{ github.ref_name }}"
-          cp twa/app-release-signed.apk "Medik-$TAG.apk"
-          cp twa/app-release-bundle.aab "Medik-$TAG.aab"
+          cp app-release-signed.apk "Medik-$TAG.apk"
+          cp app-release-bundle.aab "Medik-$TAG.aab"
           gh release view "$TAG" > /dev/null 2>&1 || gh release create "$TAG" --title "Medik $TAG" --notes "Trusted Web Activity release (PWABuilder-style, release-signed)."
           gh release upload "$TAG" "Medik-$TAG.apk" "Medik-$TAG.aab" --clobber
