@@ -15,7 +15,7 @@ export default function App() {
         <Text className="text-3xl font-extrabold text-white">M</Text>
       </View>
       <Text className="mt-5 text-[11px] font-extrabold uppercase tracking-[0.2em] text-accent dark:text-accent-bright">
-        Medik Triage
+        Medik
       </Text>
       <Text className="mt-2 text-center text-2xl font-extrabold text-ink dark:text-[#e8f0ee]">
         Mobile app scaffold

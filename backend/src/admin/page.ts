@@ -4,7 +4,7 @@ export function adminPage(): string {
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Medik AI — Admin</title>
+<title>Medik — Admin</title>
 <meta name="theme-color" content="#0e1513" />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -40,7 +40,7 @@ export function adminPage(): string {
 </style>
 </head>
 <body>
-<header><b>MEDIK AI · ADMIN</b><span class="live"><i></i><span id="updated">connecting…</span></span></header>
+<header><b>MEDIK · ADMIN</b><span class="live"><i></i><span id="updated">connecting…</span></span></header>
 <main>
   <div class="grid" id="cards"></div>
   <h2>System — CPU / Memory</h2>

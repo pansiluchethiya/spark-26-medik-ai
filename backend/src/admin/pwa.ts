@@ -2,8 +2,8 @@
 // they contain no sensitive data). Installable via PWABuilder / browsers.
 export function adminManifest() {
   return {
-    name: 'Medik AI Admin',
-    short_name: 'Medik Admin',
+    name: 'Medik Admin',
+    short_name: 'Medik',
     description: 'Monitoring dashboard for the Medik AI backend.',
     start_url: '/admin',
     scope: '/admin/',
