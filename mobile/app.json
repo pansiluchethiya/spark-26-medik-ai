@@ -7,13 +7,18 @@
     "icon": "./assets/icon.png",
     "scheme": "medik",
     "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1d5c52"
+    },
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "package": "ci.us.medik.triage",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#1d5c52",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
