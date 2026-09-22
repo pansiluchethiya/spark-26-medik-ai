@@ -64,7 +64,7 @@ export function FollowUpBar(props: FollowUpBarProps) {
         </button>
       )}
       {props.followUps.map((chip) => (
-        <button key={chip} type="button" onClick={() => props.onSelectFollowUp(chip)} className="inline-flex min-h-[32px] items-center whitespace-nowrap rounded-full border border-accent-border bg-accent-soft px-3 text-[11px] font-bold text-accent transition hover:bg-accent hover:text-white dark:border-[#296659] dark:text-accent-bright dark:hover:bg-accent-bright dark:hover:text-[#0c1412]">
+        <button key={chip} type="button" onClick={() => props.onSelectFollowUp(chip)} className="inline-flex min-h-[32px] items-center whitespace-nowrap rounded-full border border-accent-border bg-accent-soft px-3 text-[11px] font-bold text-accent transition hover:bg-accent hover:text-white dark:border-[#296659] dark:text-accent-bright dark:hover:bg-[#257d6e] dark:hover:text-white dark:hover:border-[#257d6e]">
           {chip}
         </button>
       ))}

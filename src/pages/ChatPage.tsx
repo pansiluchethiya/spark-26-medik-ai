@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Stethoscope, Search, AlertTriangle, Plus, Menu, Settings } from 'lucide-react'
+import { Stethoscope, Search, AlertTriangle, Plus, Menu, PanelLeft, Settings } from 'lucide-react'
 import { ChatComposer } from '../components/ChatComposer'
 import { ChatMessages } from '../components/ChatMessages'
-import { ChatHistoryDrawer } from '../components/ChatHistoryDrawer'
+import { ChatHistoryDrawer, ChatHistoryPanel } from '../components/ChatHistoryDrawer'
+import { navigate } from '../lib/route'
 import { SettingsModal } from '../components/SettingsModal'
 import { readAssistantStream } from '../lib/stream'
 import { apiHeaders, apiUrl } from '../lib/api'
@@ -35,6 +36,7 @@ export default function ChatPage() {
   const [error, setError] = useState('')
   const [preferences, setPreferences] = useState<LocalPreferences>(() => readPreferences())
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [flyoutOpen, setFlyoutOpen] = useState(() => typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
 
@@ -186,14 +188,35 @@ export default function ChatPage() {
   }
 
   return (
-    <main className="relative flex h-[100dvh] min-h-[100dvh] w-full flex-col overflow-hidden bg-canvas text-ink dark:bg-[#121c19] dark:text-[#e8f0ee] supports-[height:100dvh]:h-[100dvh]">
-      {/* Ambient liquid-glass glow (behind content, non-interactive) */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-        <div className="animate-drift absolute -top-24 left-[12%] h-72 w-72 rounded-full bg-accent/10 blur-3xl dark:bg-accent-bright/[0.07]" />
-        <div className="animate-drift absolute -bottom-28 right-[8%] h-80 w-80 rounded-full bg-accent/[0.07] blur-3xl dark:bg-accent-bright/[0.05]" style={{ animationDelay: '3s' }} />
-      </div>
-      {/* Top bar - liquid glass, fully responsive, safe-area aware */}
-      <header className="relative mx-auto flex h-14 w-full max-w-[1280px] shrink-0 items-center justify-between gap-2 border-b border-line/70 bg-card/65 px-2.5 shadow-[0_4px_24px_rgba(34,48,44,0.06)] backdrop-blur-xl saturate-150 sm:h-[64px] sm:gap-3 sm:px-4 dark:border-[#2c4039]/70 dark:bg-[#192622]/65" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+    <main className="flex h-[100dvh] min-h-[100dvh] w-full flex-col overflow-hidden bg-canvas text-ink lg:flex-row dark:bg-[#121c19] dark:text-[#e8f0ee] supports-[height:100dvh]:h-[100dvh]">
+      {/* Desktop icon rail (replaces the top bar on lg+) */}
+      <nav aria-label="App navigation" className="hidden w-16 shrink-0 flex-col items-center gap-2 border-r border-line bg-card py-4 lg:flex dark:border-[#2c4039] dark:bg-[#192622]">
+        <button type="button" onClick={() => navigate('/')} title="Back to home" aria-label="Back to home" className="grid h-10 w-10 place-items-center rounded-xl bg-accent text-white transition hover:bg-accent-hover dark:bg-[#257d6e] dark:text-white">
+          <Stethoscope size={19} />
+        </button>
+        <button type="button" onClick={startNewChat} title="New chat" aria-label="New chat" className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-card-subtle text-muted transition hover:border-accent hover:text-accent dark:border-[#2c4039] dark:bg-[#21302b] dark:text-[#9eb5ae] dark:hover:text-white">
+          <Plus size={18} />
+        </button>
+        <button type="button" onClick={() => setFlyoutOpen((v) => !v)} title="Chat history" aria-label="Chat history" aria-pressed={flyoutOpen} className={`grid h-10 w-10 place-items-center rounded-xl border transition ${flyoutOpen ? 'border-accent bg-accent-soft text-accent dark:border-[#296659] dark:bg-[#21302b] dark:text-white' : 'border-line bg-card-subtle text-muted hover:border-accent hover:text-accent dark:border-[#2c4039] dark:bg-[#21302b] dark:text-[#9eb5ae] dark:hover:text-white'}`}>
+          <PanelLeft size={18} />
+        </button>
+        <div className="mt-auto flex flex-col items-center gap-2">
+          <button type="button" onClick={() => setSettingsOpen(true)} title="Settings" aria-label="Settings" className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-card-subtle text-muted transition hover:border-accent hover:text-accent dark:border-[#2c4039] dark:bg-[#21302b] dark:text-[#9eb5ae] dark:hover:text-white">
+            <Settings size={17} />
+          </button>
+        </div>
+      </nav>
+
+      {/* Desktop history flyout */}
+      {flyoutOpen && (
+        <aside className="hidden h-full w-[320px] shrink-0 flex-col border-r border-line bg-card animate-drawer lg:flex dark:border-[#2c4039] dark:bg-[#192622]">
+          <ChatHistoryPanel sessions={chatSessions} activeId={activeSessionId} onSelect={selectChat} onDelete={deleteChatSession} onNew={startNewChat} onClose={() => setFlyoutOpen(false)} />
+        </aside>
+      )}
+
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+      {/* Top bar - floating glass pill on mobile, hidden on desktop (rail) */}
+      <header className="mx-3 mt-[calc(0.75rem+env(safe-area-inset-top))] flex h-14 w-auto shrink-0 items-center justify-between gap-2 rounded-3xl border border-line bg-card px-2.5 shadow-lg sm:mx-4 sm:h-[64px] sm:gap-3 sm:px-4 lg:hidden dark:border-[#2c4039] dark:bg-[#192622]" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="flex items-center gap-2.5">
           <button type="button" aria-label="Open navigation" onClick={() => setDrawerOpen(true)} className="grid h-9 w-9 place-items-center rounded-xl border border-line bg-card-subtle text-muted hover:bg-accent-soft hover:text-accent dark:border-[#2c4039] dark:bg-[#21302b] dark:text-[#9eb5ae]">
             <Menu size={18} />
@@ -218,24 +241,7 @@ export default function ChatPage() {
       <section aria-label="Main workspace" className="relative flex min-h-0 w-full flex-1 flex-col items-center overflow-hidden">
         <div className="flex h-full w-full max-w-[720px] min-h-0 flex-1 flex-col px-2.5 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-2 sm:px-4 sm:pt-3">
           {messages.length === 0 ? (
-            <div className="relative flex w-full flex-1 flex-col items-center justify-center py-4 text-center sm:py-6">
-              {/* Floating glass chips (desktop decor, mirrors landing hero) */}
-              <div className="pointer-events-none absolute left-[1%] top-[16%] hidden w-44 lg:block" aria-hidden="true">
-                <div className="animate-float rounded-2xl border border-line/70 bg-card/70 p-3 text-left shadow-md backdrop-blur-xl dark:border-[#2c4039]/70 dark:bg-[#192622]/70">
-                  <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-accent dark:text-accent-bright">Top match</p>
-                  <p className="mt-0.5 truncate text-[12px] font-bold">Viral pharyngitis</p>
-                  <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-line-soft dark:bg-[#0f1a17]">
-                    <div className="h-full w-[74%] rounded-full bg-accent dark:bg-accent-bright" />
-                  </div>
-                  <p className="mt-1 text-[11px] font-extrabold tabular-nums text-accent dark:text-accent-bright">74%</p>
-                </div>
-              </div>
-              <div className="pointer-events-none absolute right-[1%] top-[26%] hidden w-44 lg:block" aria-hidden="true">
-                <div className="animate-float-slow rounded-2xl border border-line/70 bg-card/70 p-3 text-left shadow-md backdrop-blur-xl dark:border-[#2c4039]/70 dark:bg-[#192622]/70">
-                  <p className="flex items-center gap-1.5 text-[12px] font-bold"><span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#dc2626]/10 text-[#dc2626]"><AlertTriangle size={13} /></span>2 red flags checked</p>
-                  <p className="mt-1.5 flex items-center gap-1.5 text-[12px] font-bold"><span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-accent-soft text-accent dark:bg-[#21302b] dark:text-accent-bright"><Search size={13} /></span>3 verified sources</p>
-                </div>
-              </div>
+            <div className="flex w-full flex-1 flex-col items-center justify-center py-4 text-center sm:py-6">
               <span className="grid h-11 w-11 place-items-center rounded-full border-[2.5px] border-accent bg-card text-accent shadow-sm sm:h-[52px] sm:w-[52px] dark:border-accent-bright dark:text-accent-bright" aria-hidden="true"><Plus size={20} strokeWidth={2.75} className="sm:h-6 sm:w-6" /></span>
               <p className="mt-3 text-[10px] font-extrabold uppercase tracking-[0.18em] text-accent dark:text-accent-bright sm:mt-4 sm:text-[11px]">AI triage & diagnostic</p>
               <h1 className="mt-1 max-w-[560px] text-[22px] font-extrabold tracking-tight sm:text-[30px]">Tell me what’s going on.</h1>
@@ -265,9 +271,8 @@ export default function ChatPage() {
             />
           )}
 
-          {/* Composer - centered, constrained, floating glass */}
-          <div className="relative mx-auto w-full max-w-[720px] shrink-0 pt-2">
-            <div className="pointer-events-none absolute inset-x-8 -top-6 bottom-0 rounded-full bg-accent/10 blur-2xl dark:bg-accent-bright/[0.06]" aria-hidden="true" />
+          {/* Composer - centered, constrained */}
+          <div className="mx-auto w-full max-w-[720px] shrink-0 pt-2">
             <ChatComposer prompt={prompt} isSending={isSending} isEditing={editingIndex !== null} onChange={setPrompt} onSubmit={handleSubmit} onStop={stopSending} onCancelEdit={cancelEdit} />
             {error && <p role="alert" className="mt-2 rounded-xl border border-urgent-border bg-urgent-bg px-3 py-2 text-[13px] font-semibold text-urgent-strong dark:bg-[#dc2626]/10">{error}</p>}
           </div>
@@ -275,6 +280,7 @@ export default function ChatPage() {
       </section>
 
       <footer className="mx-auto hidden w-full max-w-[720px] shrink-0 px-4 pb-4 pt-1 text-center text-[11px] font-medium text-faint sm:block dark:text-[#6e857e]">Medik Triage is AI information only — not a medical diagnosis. Verify important information with a clinician.</footer>
+      </div>{/* /content column */}
 
       {drawerOpen && (
         <ChatHistoryDrawer

@@ -17,6 +17,32 @@ export function ChatHistoryDrawer({
   onDelete: (id: string) => void
   onNew: () => void
 }) {
+  return (
+    <div className="fixed inset-0 z-40 flex" role="dialog" aria-modal="true">
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
+      <aside className="relative flex h-full w-[340px] max-w-[88vw] flex-col border-r border-line bg-card shadow-xl animate-drawer dark:border-[#2c4039] dark:bg-[#192622]">
+        <ChatHistoryPanel sessions={sessions} activeId={activeId} onSelect={(s) => { onSelect(s); onClose() }} onDelete={onDelete} onNew={() => { onNew(); onClose() }} onClose={onClose} />
+      </aside>
+    </div>
+  )
+}
+
+// Reusable history panel (mobile overlay drawer + desktop flyout sidebar).
+export function ChatHistoryPanel({
+  sessions,
+  activeId,
+  onSelect,
+  onDelete,
+  onNew,
+  onClose,
+}: {
+  sessions: ChatSession[]
+  activeId: string
+  onSelect: (s: ChatSession) => void
+  onDelete: (id: string) => void
+  onNew: () => void
+  onClose?: () => void
+}) {
   const [search, setSearch] = useState('')
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim()
@@ -32,16 +58,16 @@ export function ChatHistoryDrawer({
   }
 
   return (
-    <div className="fixed inset-0 z-40 flex" role="dialog" aria-modal="true">
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
-      <aside className="relative flex h-full w-[340px] max-w-[88vw] flex-col border-r border-line bg-card shadow-xl animate-drawer dark:border-[#2c4039] dark:bg-[#192622]">
-        <div className="flex items-center justify-between border-b border-line-soft px-4 py-3.5 dark:border-[#22332c]">
-          <div>
-            <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-accent dark:text-accent-bright">Your conversations</p>
-            <h2 className="text-[15px] font-extrabold">History</h2>
-          </div>
-          <button type="button" aria-label="Close history" onClick={onClose} className="grid h-8 w-8 place-items-center rounded-lg border border-line bg-card-subtle dark:border-[#2c4039] dark:bg-[#21302b]"><X size={14} /></button>
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="flex items-center justify-between border-b border-line-soft px-4 py-3.5 dark:border-[#22332c]">
+        <div>
+          <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-accent dark:text-accent-bright">Your conversations</p>
+          <h2 className="text-[15px] font-extrabold">History</h2>
         </div>
+        {onClose && (
+          <button type="button" aria-label="Close history" onClick={onClose} className="grid h-8 w-8 place-items-center rounded-lg border border-line bg-card-subtle dark:border-[#2c4039] dark:bg-[#21302b]"><X size={14} /></button>
+        )}
+      </div>
 
         <div className="p-3">
           <button type="button" onClick={onNew} className="w-full rounded-xl bg-accent px-3 py-2.5 text-sm font-bold text-white hover:bg-accent-hover dark:bg-[#257d6e] dark:text-white">+ New conversation</button>
@@ -67,7 +93,6 @@ export function ChatHistoryDrawer({
           )) : <p className="py-8 text-center text-sm text-faint">No conversations match.</p>}
         </div>
         <p className="border-t border-line-soft px-3 py-2 text-center text-[11px] text-faint dark:border-[#22332c]">Stored locally — no database.</p>
-      </aside>
     </div>
   )
 }

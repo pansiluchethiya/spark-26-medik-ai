@@ -42,7 +42,7 @@ export function ChatComposer({
   return (
     <form
       onSubmit={onSubmit}
-      className="w-full rounded-[20px] border border-line/80 bg-card/75 p-3 shadow-[0_8px_32px_rgba(34,48,44,0.10)] backdrop-blur-xl saturate-150 transition focus-within:border-accent/50 focus-within:shadow-[0_8px_36px_rgba(29,92,82,0.16)] dark:border-[#2c4039]/80 dark:bg-[#192622]/75"
+      className="w-full rounded-[20px] border border-line bg-card p-3 shadow-[0_8px_32px_rgba(34,48,44,0.08)] transition focus-within:border-accent/50 focus-within:shadow-[0_8px_32px_rgba(29,92,82,0.12)] dark:border-[#2c4039] dark:bg-[#192622]"
     >
       {isEditing && (
         <div className="mb-2 flex items-center justify-between rounded-xl bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-900 dark:bg-amber-500/10 dark:text-amber-200">

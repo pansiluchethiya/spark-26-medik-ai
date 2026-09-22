@@ -1,7 +1,8 @@
 // Derives the "possible matches" meter from an assistant answer.
 // The AI lists differentials in order, so the meter reflects that ORDER
-// (first = strongest match). These are illustrative ordering bars —
-// explicitly NOT clinical probabilities.
+// (first = strongest match). Illustrative ordering bars — explicitly
+// NOT clinical probabilities.
+import { normalizeSections, splitNormalized } from './sections'
 
 export type MatchCandidate = { label: string; score: number }
 
@@ -28,12 +29,11 @@ function cleanLabel(raw: string): string {
 const SKIP = /(^based on your description|^this information is educational|^because breathing|seek (prompt|immediate)|clinician|urgent-care|\?$)/i
 
 export function extractMatches(content: string): MatchCandidate[] {
-  const start = content.indexOf('[SECTION:assessment]')
-  if (start < 0) return []
-  const end = content.indexOf('[SECTION:', start + 1)
-  const block = content.slice(start, end < 0 ? undefined : end)
+  const blocks = splitNormalized(normalizeSections(content))
+  const block = blocks.find((b) => b.kind === 'assessment') ?? blocks.find((b) => b.kind === 'body')
+  if (!block) return []
   const out: MatchCandidate[] = []
-  for (const line of block.split('\n')) {
+  for (const line of block.body.split('\n')) {
     if (out.length >= 3) break
     const trimmed = line.trim()
     if (!/^\s*[-*+•]/.test(trimmed) && !/^\d+\./.test(trimmed)) continue

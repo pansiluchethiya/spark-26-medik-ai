@@ -2,6 +2,7 @@ import ReactMarkdown from 'react-markdown'
 import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import { cn } from '../lib/cn'
+import { normalizeSections, splitNormalized, stripSectionTags } from '../lib/sections'
 import { HeartPulse, ShieldAlert, ListChecks, BookOpen, Info } from 'lucide-react'
 
 type MarkdownSectionKind = 'assessment' | 'urgent' | 'selfcare' | 'sources' | 'body'
@@ -18,23 +19,20 @@ function sectionKindFromTitle(title: string): MarkdownSectionKind {
 }
 
 function splitSections(content: string): MarkdownSection[] {
-  // Support new tags: [SECTION:assessment] [SECTION:urgent] [SECTION:selfcare] [SECTION:sources] plus legacy actions/body
-  const explicitMatches = [...content.matchAll(/\[SECTION:(assessment|urgent|selfcare|sources|actions|body)\]\s*([\s\S]*?)(?=\n\s*\[SECTION:|$)/gi)]
-  if (explicitMatches.length) {
-    return explicitMatches
-      .map((match) => {
-        const raw = match[1].toLowerCase()
-        let kind: MarkdownSectionKind = 'body'
-        let title = 'Overview'
-        if (raw === 'assessment') { kind = 'assessment'; title = 'What this could be' }
-        else if (raw === 'urgent') { kind = 'urgent'; title = 'When to seek care quickly' }
-        else if (raw === 'selfcare') { kind = 'selfcare'; title = 'What you can do now' }
-        else if (raw === 'sources') { kind = 'sources'; title = 'Sources & further reading' }
-        else if (raw === 'actions') { kind = 'selfcare'; title = 'What you can do now' }
-        else if (raw === 'body') { kind = 'assessment'; title = 'Overview' }
-        return { title, content: match[2].trim(), kind }
-      })
-      .filter((s) => s.content.trim())
+  // Normalize tolerant tag variants ([SECTION: x], **[SECTION:x]**, inline)
+  // then split on tag lines — every section always parses.
+  const normalized = normalizeSections(content)
+  const blocks = splitNormalized(normalized)
+  if (blocks.length) {
+    const toSection = (kind: string, body: string): MarkdownSection => {
+      const raw = kind.toLowerCase()
+      if (raw === 'assessment') return { title: 'What this could be', content: body, kind: 'assessment' }
+      if (raw === 'urgent') return { title: 'When to seek care quickly', content: body, kind: 'urgent' }
+      if (raw === 'selfcare' || raw === 'actions') return { title: 'What you can do now', content: body, kind: 'selfcare' }
+      if (raw === 'sources') return { title: 'Sources & further reading', content: body, kind: 'sources' }
+      return { title: 'Overview', content: body, kind: 'body' }
+    }
+    return blocks.map((b) => toSection(b.kind, stripSectionTags(b.body)))
   }
   // Fallback: split by markdown headings
   const lines = content.split(/\r?\n/)
@@ -152,7 +150,7 @@ const sectionConfig: Record<MarkdownSectionKind, { style: string; icon: typeof H
 }
 
 export function MarkdownResponse({ content }: { content: string }) {
-  const sections = splitSections(content)
+  const sections = splitSections(stripSectionTags(content))
   return (
     <div className="grid min-w-0 gap-3">
       {sections.map((section, index) => {
