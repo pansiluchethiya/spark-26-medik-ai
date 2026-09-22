@@ -80,8 +80,31 @@ export function ChatMessages({
   const [speakingIndex, setSpeakingIndex] = useState<number | null>(null)
   const [playbackRate, setPlaybackRate] = useState<number>(1.0)
   const conversationRef = useRef<HTMLDivElement>(null)
+  // Stick-to-bottom: follow new tokens only while the user is already at
+  // the bottom. If they scroll up to read, stay put and offer a jump button.
+  const stickRef = useRef(true)
+  const [stuck, setStuck] = useState(true)
 
-  useEffect(() => { conversationRef.current?.scrollTo({ top: conversationRef.current.scrollHeight, behavior: 'smooth' }) }, [messages, isSending])
+  const handleScroll = () => {
+    const el = conversationRef.current
+    if (!el) return
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120
+    stickRef.current = nearBottom
+    setStuck(nearBottom)
+  }
+
+  const jumpToLatest = () => {
+    const el = conversationRef.current
+    if (!el) return
+    stickRef.current = true
+    setStuck(true)
+    el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
+  }
+
+  useEffect(() => {
+    const el = conversationRef.current
+    if (el && stickRef.current) el.scrollTop = el.scrollHeight
+  }, [messages, isSending])
   useEffect(() => () => { stopSpeech() }, [])
 
   const handleCopy = (content: string, index: number) => {
@@ -102,7 +125,7 @@ export function ChatMessages({
   const actionBtn = 'inline-flex min-h-[32px] items-center gap-1 rounded-full border border-line bg-card px-2.5 text-[11px] font-semibold text-muted transition hover:border-accent-border hover:bg-accent-soft hover:text-accent dark:border-[#22332c] dark:bg-[#21302b] dark:text-[#9eb5ae] dark:hover:text-accent-bright'
 
   return (
-    <div ref={conversationRef} aria-live="polite" className="mx-auto mb-3 flex min-h-0 w-full max-w-[720px] min-w-0 flex-1 flex-col gap-4 overflow-y-auto overflow-x-clip px-1 py-2 sm:px-1.5">
+    <div ref={conversationRef} onScroll={handleScroll} aria-live="polite" className="mx-auto mb-3 flex min-h-0 w-full max-w-[720px] min-w-0 flex-1 flex-col gap-4 overflow-y-auto overflow-x-clip px-1 py-2 sm:px-1.5">
       {messages.map((message, index) => {
         const sources = message.role === 'assistant' ? extractSourcesFromMarkdown(message.content) : []
         const isUser = message.role === 'user'
@@ -152,11 +175,15 @@ export function ChatMessages({
             {message.role === 'assistant' ? <MarkdownResponse content={message.content} /> : (
               <div>
                 <p className="whitespace-pre-wrap break-words">{message.content}</p>
-                {onEditMessage && !isSending && (
-                  <div className="mt-2 flex justify-end">
-                    <button type="button" onClick={() => onEditMessage(index)} className="inline-flex min-h-[32px] items-center gap-1 rounded-full border border-line bg-white px-3 text-[11px] font-semibold text-faint shadow-sm transition hover:border-accent hover:text-accent dark:border-[#2c4039] dark:bg-[#21302b] dark:text-[#9eb5ae] dark:hover:text-accent-bright">
-                      <Pencil size={12} /><span>Edit & resend</span>
-                    </button>
+                {onEditMessage && (
+                  <div className="mt-2 flex min-h-[32px] justify-end">
+                    {isSending ? (
+                      <span aria-hidden="true" className="invisible inline-flex min-h-[32px] items-center px-3 text-[11px] font-semibold">Edit &amp; resend</span>
+                    ) : (
+                      <button type="button" onClick={() => onEditMessage(index)} className="inline-flex min-h-[32px] items-center gap-1 rounded-full border border-line bg-white px-3 text-[11px] font-semibold text-faint shadow-sm transition hover:border-accent hover:text-accent dark:border-[#2c4039] dark:bg-[#21302b] dark:text-[#9eb5ae] dark:hover:text-accent-bright">
+                        <Pencil size={12} /><span>Edit & resend</span>
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
@@ -197,6 +224,18 @@ export function ChatMessages({
             <span className="h-2 w-2 animate-pulse rounded-full bg-accent dark:bg-accent-bright" />
             Thinking…
           </p>
+        </div>
+      )}
+
+      {!stuck && (
+        <div className="sticky bottom-3 z-10 -mb-9 flex h-9 justify-center overflow-visible pointer-events-none">
+          <button
+            type="button"
+            onClick={jumpToLatest}
+            className="animate-pop pointer-events-auto inline-flex h-9 items-center gap-1.5 rounded-full border border-line bg-card px-4 text-[12px] font-bold text-accent shadow-md transition hover:border-accent dark:border-[#2c4039] dark:bg-[#21302b] dark:text-accent-bright"
+          >
+            ↓ Latest
+          </button>
         </div>
       )}
     </div>
