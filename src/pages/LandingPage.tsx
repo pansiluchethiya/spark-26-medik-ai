@@ -1,5 +1,7 @@
-import { Activity, AlertTriangle, ArrowRight, Globe, Mic, Search, ShieldCheck, Stethoscope } from 'lucide-react'
+import { Activity, AlertTriangle, ArrowRight, Download, Globe, Mic, Search, ShieldCheck, Smartphone, Stethoscope } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { navigate } from '../lib/route'
+import { RELEASES_PAGE, getLatestApk, type ReleaseApk } from '../lib/release'
 import { Reveal, useInView } from '../components/Reveal'
 import { cn } from '../lib/cn'
 
@@ -92,6 +94,16 @@ function HeroVisual() {
 
 export default function LandingPage() {
   const openApp = () => navigate('/app')
+  const [apk, setApk] = useState<ReleaseApk | null>(null)
+  const [apkLoading, setApkLoading] = useState(true)
+  useEffect(() => {
+    const controller = new AbortController()
+    getLatestApk(controller.signal)
+      .then(setApk)
+      .catch(() => {})
+      .finally(() => setApkLoading(false))
+    return () => controller.abort()
+  }, [])
   return (
     <div className="min-h-[100dvh] w-full overflow-x-clip bg-canvas text-ink dark:bg-[#121c19] dark:text-[#e8f0ee]">
       {/* Top bar */}
@@ -150,6 +162,30 @@ export default function LandingPage() {
             <Reveal delay={150}><HeroVisual /></Reveal>
           </div>
         </section>
+
+        {/* Get the Android app */}
+        <Reveal>
+          <section aria-label="Get the Android app" className="mb-4 flex flex-col items-center gap-4 rounded-2xl border border-line bg-card p-5 text-center shadow-sm sm:flex-row sm:text-left dark:border-[#2c4039] dark:bg-[#192622]">
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-accent text-white shadow-md dark:bg-[#257d6e]" aria-hidden="true"><Smartphone size={22} /></span>
+            <div className="min-w-0 flex-1">
+              <h2 className="text-[16px] font-extrabold">Take Medik with you</h2>
+              <p className="mt-1 text-[13px] leading-relaxed text-muted dark:text-[#9eb5ae]">
+                {apkLoading
+                  ? 'Checking the latest release…'
+                  : apk
+                    ? `Android app v${apk.version} · ${apk.sizeMB} MB · direct from GitHub. Allow “install unknown apps” once when prompted.`
+                    : 'Grab the Android build from the releases page.'}
+              </p>
+            </div>
+            <a
+              href={apk?.url ?? RELEASES_PAGE}
+              className="inline-flex h-11 shrink-0 items-center gap-2 rounded-full bg-accent px-6 text-[14px] font-bold text-white shadow-md transition hover:-translate-y-0.5 hover:bg-accent-hover hover:shadow-lg active:translate-y-0 dark:bg-[#257d6e] dark:hover:bg-[#2f9483]"
+            >
+              <Download size={16} />
+              {apkLoading ? 'Checking…' : apk ? `Download APK · v${apk.version}` : 'See releases'}
+            </a>
+          </section>
+        </Reveal>
 
         {/* Features */}
         <section aria-label="Features" className="grid grid-cols-1 gap-3 pb-4 sm:grid-cols-2">
