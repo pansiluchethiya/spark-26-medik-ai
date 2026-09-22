@@ -1,0 +1,4 @@
+# SPA fallback for Cloudflare Pages: serve index.html for all
+# frontend routes (e.g. /app). API calls go to api.medik.us.ci
+# (cross-origin), so this rule never shadows the backend.
+/*    /index.html   200

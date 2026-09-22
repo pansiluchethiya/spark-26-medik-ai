@@ -28,7 +28,7 @@ self.addEventListener('fetch', (event) => {
   if (url.pathname.startsWith('/api/')) return
 
   // App shell: network-first so new deploys take effect immediately.
-  if (url.pathname === '/' || url.pathname === '/index.html') {
+  if (url.pathname === '/' || url.pathname === '/index.html' || url.pathname === '/app' || url.pathname.startsWith('/app/')) {
     event.respondWith(
       fetch(request).then((response) => {
         if (response.ok) {
