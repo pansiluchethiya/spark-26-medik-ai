@@ -185,6 +185,18 @@ export default function LandingPage() {
               {apkLoading ? 'Checking…' : apk ? `Download APK · v${apk.version}` : 'See releases'}
             </a>
           </section>
+          {apk && !apkLoading && (
+            <div className="mb-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 rounded-2xl border border-dashed border-line bg-card-subtle/60 px-4 py-3 text-[12px] text-muted sm:justify-start dark:border-[#22332c] dark:bg-[#21302b]/40 dark:text-[#9eb5ae]" aria-label="Latest release details">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-accent-soft px-2.5 py-1 font-extrabold text-accent dark:bg-[#21302b] dark:text-accent-bright">v{apk.version}</span>
+              {apk.publishedAt && (
+                <span>Released {new Date(apk.publishedAt).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+              )}
+              {apk.notes && (
+                <span className="w-full truncate sm:w-auto sm:max-w-[420px]" title={apk.notes}>{apk.notes.split('\n')[0].slice(0, 90)}</span>
+              )}
+              <a href={apk.htmlUrl} target="_blank" rel="noopener noreferrer" className="font-bold text-accent underline-offset-2 hover:underline dark:text-accent-bright">Full notes</a>
+            </div>
+          )}
         </Reveal>
 
         {/* Features */}
