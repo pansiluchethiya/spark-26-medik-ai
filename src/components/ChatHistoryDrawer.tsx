@@ -44,7 +44,7 @@ export function ChatHistoryDrawer({
         </div>
 
         <div className="p-3">
-          <button type="button" onClick={onNew} className="w-full rounded-xl bg-accent px-3 py-2.5 text-sm font-bold text-white hover:bg-accent-hover dark:bg-accent-bright dark:text-[#0c1412]">+ New conversation</button>
+          <button type="button" onClick={onNew} className="w-full rounded-xl bg-accent px-3 py-2.5 text-sm font-bold text-white hover:bg-accent-hover dark:bg-[#257d6e] dark:text-white">+ New conversation</button>
           <label className="mt-3 flex items-center gap-2 rounded-xl border border-line bg-card-subtle px-3 py-2 text-sm dark:border-[#2c4039] dark:bg-[#21302b]">
             <Search size={14} className="text-faint" />
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search conversations" className="w-full bg-transparent outline-none placeholder:text-faint" />

@@ -52,8 +52,8 @@ export function SettingsModal({
           <div className="rounded-xl border border-line bg-card-subtle p-3.5 dark:border-[#2c4039] dark:bg-[#21302b]">
             <p className="text-xs font-bold">Theme</p>
             <div className="mt-2 flex gap-2">
-              <button type="button" onClick={() => setTheme('light')} className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-bold ${theme==='light' ? 'border-accent bg-accent text-white dark:bg-accent-bright dark:text-[#0c1412]' : 'border-line bg-card dark:border-[#2c4039] dark:bg-[#192622]'}`}><Sun size={14} /> Light</button>
-              <button type="button" onClick={() => setTheme('dark')} className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-bold ${theme==='dark' ? 'border-accent bg-accent text-white dark:bg-accent-bright dark:text-[#0c1412]' : 'border-line bg-card dark:border-[#2c4039] dark:bg-[#192622]'}`}><Moon size={14} /> Dark</button>
+              <button type="button" onClick={() => setTheme('light')} className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-bold ${theme==='light' ? 'border-accent bg-accent text-white dark:bg-[#257d6e] dark:text-white' : 'border-line bg-card dark:border-[#2c4039] dark:bg-[#192622]'}`}><Sun size={14} /> Light</button>
+              <button type="button" onClick={() => setTheme('dark')} className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-bold ${theme==='dark' ? 'border-accent bg-accent text-white dark:bg-[#257d6e] dark:text-white' : 'border-line bg-card dark:border-[#2c4039] dark:bg-[#192622]'}`}><Moon size={14} /> Dark</button>
             </div>
             <p className="mt-2 text-[11px] text-faint">Web search is always on — Medik checks current medical guidance for every question.</p>
           </div>

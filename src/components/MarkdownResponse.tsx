@@ -144,8 +144,8 @@ function SourceCards({ content }: { content: string }) {
 }
 
 const sectionConfig: Record<MarkdownSectionKind, { style: string; icon: typeof HeartPulse; badge: string }> = {
-  assessment: { style: 'border-line bg-card dark:border-[#2c4039] dark:bg-[#192622]', icon: HeartPulse, badge: 'bg-accent text-white dark:bg-accent-bright dark:text-[#0c1412]' },
-  selfcare: { style: 'border-accent-border bg-accent-soft/70 dark:border-[#296659] dark:bg-[#21302b]', icon: ListChecks, badge: 'bg-accent text-white dark:bg-accent-bright dark:text-[#0c1412]' },
+  assessment: { style: 'border-line bg-card dark:border-[#2c4039] dark:bg-[#192622]', icon: HeartPulse, badge: 'bg-accent text-white dark:bg-[#257d6e] dark:text-white' },
+  selfcare: { style: 'border-accent-border bg-accent-soft/70 dark:border-[#296659] dark:bg-[#21302b]', icon: ListChecks, badge: 'bg-accent text-white dark:bg-[#257d6e] dark:text-white' },
   urgent: { style: 'border-amber-200 bg-amber-50 dark:border-[#8a6a10] dark:bg-[#2b2410]', icon: ShieldAlert, badge: 'bg-amber-500 text-white' },
   sources: { style: 'border-line bg-card-subtle dark:border-[#22332c] dark:bg-[#21302b]/50', icon: BookOpen, badge: 'bg-clay text-white' },
   body: { style: 'border-line bg-card dark:border-[#2c4039] dark:bg-[#192622]', icon: Info, badge: 'bg-faint text-white' },

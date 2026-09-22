@@ -4,7 +4,7 @@ import { X } from 'lucide-react'
 import { cn } from '../lib/cn'
 
 export const btnPrimary =
-  'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-accent px-5 text-sm font-bold text-white transition hover:bg-accent-hover hover:shadow-sm active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50 dark:bg-accent-bright dark:text-[#0c1412] dark:hover:bg-accent-bright-hover'
+  'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-accent px-5 text-sm font-bold text-white transition hover:bg-accent-hover hover:shadow-sm active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#257d6e] dark:text-white dark:hover:bg-[#2f9483]'
 
 export const btnSecondary =
   'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-line bg-card px-4 text-sm font-semibold text-ink transition hover:border-accent-border hover:bg-accent-soft active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#2c4039] dark:bg-[#192622] dark:text-[#e8f0ee] dark:hover:border-[#296659] dark:hover:bg-[#21302b]'

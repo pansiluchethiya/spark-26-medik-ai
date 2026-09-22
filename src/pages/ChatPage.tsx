@@ -193,7 +193,7 @@ export default function ChatPage() {
           <button type="button" aria-label="Open navigation" onClick={() => setDrawerOpen(true)} className="grid h-9 w-9 place-items-center rounded-xl border border-line bg-card-subtle text-muted hover:bg-accent-soft hover:text-accent dark:border-[#2c4039] dark:bg-[#21302b] dark:text-[#9eb5ae]">
             <Menu size={18} />
           </button>
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-accent text-white dark:bg-accent-bright dark:text-[#0c1412]" aria-hidden="true"><Stethoscope size={18} /></span>
+          <span className="grid h-9 w-9 place-items-center rounded-xl bg-accent text-white dark:bg-[#257d6e] dark:text-white" aria-hidden="true"><Stethoscope size={18} /></span>
           <div className="hidden sm:block">
             <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-accent dark:text-accent-bright">Medik</p>
             <p className="text-[14px] font-extrabold leading-none -mt-0.5">Triage</p>
@@ -205,7 +205,7 @@ export default function ChatPage() {
           <button type="button" onClick={() => setSettingsOpen(true)} aria-label="Settings" className="grid h-9 w-9 place-items-center rounded-xl border border-line bg-card-subtle text-muted hover:bg-accent-soft hover:text-accent dark:border-[#2c4039] dark:bg-[#21302b]">
             <Settings size={16} />
           </button>
-          <button type="button" onClick={startNewChat} className="inline-flex h-9 items-center rounded-full bg-accent px-4 text-[13px] font-bold text-white shadow-sm hover:bg-accent-hover dark:bg-accent-bright dark:text-[#0c1412]">New chat</button>
+          <button type="button" onClick={startNewChat} className="inline-flex h-9 items-center rounded-full bg-accent px-4 text-[13px] font-bold text-white shadow-sm hover:bg-accent-hover dark:bg-[#257d6e] dark:text-white">New chat</button>
         </div>
       </header>
 
@@ -224,8 +224,8 @@ export default function ChatPage() {
                   { icon: Stethoscope, title: 'Fever + sore throat', hint: '2 days, what could it be?', q: 'I have had a fever and sore throat for 2 days, with headache and mild cough. What could this be and when should I seek care?' },
                   { icon: Search, title: 'Stomach pain', hint: 'Cramps after meals', q: 'I have cramping stomach pain after meals for a week, with bloating and occasional nausea. What are likely causes and red flags?' },
                   { icon: AlertTriangle, title: 'Chest tightness', hint: 'When is it urgent?', q: 'I feel occasional chest tightness and shortness of breath on exertion. What should I watch for and when is it an emergency?' },
-                ].map((s) => (
-                  <button key={s.title} type="button" onClick={() => setPrompt(s.q)} className="flex min-h-[84px] flex-col items-start gap-1 rounded-2xl border border-line bg-card p-3.5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-accent hover:bg-accent-soft hover:shadow-md dark:border-[#2c4039] dark:bg-[#192622] dark:hover:border-accent-bright">
+                ].map((s, sIdx) => (
+                  <button key={s.title} type="button" onClick={() => setPrompt(s.q)} style={{ animationDelay: `${sIdx * 90}ms` }} className="animate-pop flex min-h-[84px] flex-col items-start gap-1 rounded-2xl border border-line bg-card p-3.5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-accent hover:bg-accent-soft hover:shadow-md dark:border-[#2c4039] dark:bg-[#192622] dark:hover:border-accent-bright">
                     <span className="flex items-center gap-2 text-[13px] font-bold text-ink dark:text-[#e8f0ee]"><s.icon size={15} className="shrink-0 text-accent dark:text-accent-bright" />{s.title}</span>
                     <span className="text-[12px] text-muted dark:text-[#9eb5ae]">{s.hint}</span>
                   </button>

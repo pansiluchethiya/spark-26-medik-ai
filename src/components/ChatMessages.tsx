@@ -84,7 +84,7 @@ export function ChatMessages({
             {message.role === 'assistant' && (
               <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-line-soft pb-2.5 dark:border-[#22332c]">
                 <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.06em] text-accent dark:text-accent-bright">
-                  <span className="grid h-[22px] w-[22px] place-items-center rounded-full bg-accent text-white dark:bg-accent-bright dark:text-[#0c1412]" aria-hidden="true"><Plus size={13} strokeWidth={3.5} /></span>
+                  <span className="grid h-[22px] w-[22px] place-items-center rounded-full bg-accent text-white dark:bg-[#257d6e] dark:text-white" aria-hidden="true"><Plus size={13} strokeWidth={3.5} /></span>
                   Medik Triage
                 </p>
                 <div className="flex flex-wrap items-center gap-1.5">

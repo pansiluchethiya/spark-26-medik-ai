@@ -77,7 +77,7 @@ export function ChatComposer({
             </button>
           ) : (
             <button
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-accent text-white shadow-sm transition hover:bg-accent-hover active:translate-y-px disabled:opacity-30 dark:bg-accent-bright dark:text-[#0c1412]"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-accent text-white shadow-sm transition hover:bg-accent-hover active:translate-y-px disabled:opacity-30 dark:bg-[#257d6e] dark:text-white"
               type="submit" aria-label="Send prompt" disabled={!prompt.trim()}
             >
               <ArrowUp size={17} strokeWidth={2.5} />
