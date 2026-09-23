@@ -22,7 +22,8 @@ export function TrustFooter({ message, sourceCount }: TrustFooterProps) {
 
 // Possible-matches meter: condition rows with confidence bars under an answer.
 // Scores reflect the AI's listing ORDER (first = strongest), not probabilities.
-export function MatchMeter({ matches }: { matches: MatchCandidate[] }) {
+// Rows are tappable (when onSelectMatch is given) for a condition deep-dive.
+export function MatchMeter({ matches, onSelectMatch }: { matches: MatchCandidate[]; onSelectMatch?: (label: string) => void }) {
   if (matches.length === 0) return null
   return (
     <div className="mt-3 rounded-xl border border-line bg-card-subtle p-3 dark:border-[#22332c] dark:bg-[#21302b]/50" aria-label="Possible matches">
@@ -30,19 +31,43 @@ export function MatchMeter({ matches }: { matches: MatchCandidate[] }) {
         <Activity size={13} aria-hidden="true" /> Possible matches
       </p>
       <div className="mt-2 flex flex-col gap-2">
-        {matches.map((m) => (
-          <div key={m.label}>
-            <div className="flex items-baseline justify-between gap-2">
-              <span className="truncate text-[13px] font-bold text-ink dark:text-[#e8f0ee]">{m.label}</span>
-              <span className="shrink-0 text-[12px] font-extrabold tabular-nums text-accent dark:text-accent-bright">{m.score}%</span>
-            </div>
-            <div className="mt-1 h-2 overflow-hidden rounded-full bg-line-soft dark:bg-[#0f1a17]" role="progressbar" aria-valuenow={m.score} aria-valuemin={0} aria-valuemax={100} aria-label={`${m.label} match`}>
-              <div className="h-full rounded-full bg-accent transition-[width] duration-700 dark:bg-accent-bright" style={{ width: `${m.score}%` }} />
-            </div>
-          </div>
-        ))}
+        {matches.map((m) => {
+          const row = (
+            <>
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="truncate text-[13px] font-bold text-ink dark:text-[#e8f0ee]">{m.label}</span>
+                <span className="shrink-0 text-[12px] font-extrabold tabular-nums text-accent dark:text-accent-bright">{m.score}%</span>
+              </div>
+              <div className="mt-1 h-2 overflow-hidden rounded-full bg-line-soft dark:bg-[#0f1a17]" role="progressbar" aria-valuenow={m.score} aria-valuemin={0} aria-valuemax={100} aria-label={`${m.label} match`}>
+                <div className="h-full rounded-full bg-accent transition-[width] duration-700 dark:bg-accent-bright" style={{ width: `${m.score}%` }} />
+              </div>
+            </>
+          )
+          return onSelectMatch ? (
+            <button key={m.label} type="button" onClick={() => onSelectMatch(m.label)} title={`Tell me more about ${m.label}`} className="rounded-lg text-left transition hover:bg-accent-soft/60 focus-visible:outline-2 dark:hover:bg-[#21302b]">
+              {row}
+            </button>
+          ) : (
+            <div key={m.label}>{row}</div>
+          )
+        })}
       </div>
-      <p className="mt-2 text-[10px] font-medium text-faint dark:text-[#6e857e]">AI ordering only — not a diagnosis probability. Verify with a clinician.</p>
+      <p className="mt-2 text-[10px] font-medium text-faint dark:text-[#6e857e]">AI ordering only — not a diagnosis probability. Verify with a clinician.{onSelectMatch ? ' Tap a row to learn more.' : ''}</p>
+    </div>
+  )
+}
+
+// Quick-reply chips parsed from [QUICKREPLIES: ...]. Tapping prefills the
+// composer (nothing is sent) so the user can edit before sending.
+export function QuickReplies({ replies, onPrefill }: { replies: string[]; onPrefill: (text: string) => void }) {
+  if (replies.length === 0) return null
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-1.5" aria-label="Quick replies">
+      {replies.map((reply) => (
+        <button key={reply} type="button" onClick={() => onPrefill(reply)} className="inline-flex min-h-[32px] items-center whitespace-nowrap rounded-full border border-dashed border-accent-border bg-card px-3 text-[11px] font-bold text-accent transition hover:bg-accent-soft dark:border-[#296659] dark:bg-[#192622] dark:text-accent-bright dark:hover:bg-[#21302b]">
+          {reply}
+        </button>
+      ))}
     </div>
   )
 }

@@ -283,6 +283,7 @@ export default function ChatPage() {
               onEditMessage={editUserMessage}
               onRegenerate={regenerateLast}
               onSelectFollowUp={(text) => void submitPrompt(text)}
+              onPrefill={(text) => setPrompt(text)}
             />
           )}
 

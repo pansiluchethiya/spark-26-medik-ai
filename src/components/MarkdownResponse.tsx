@@ -3,9 +3,17 @@ import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import { cn } from '../lib/cn'
 import { normalizeSections, splitNormalized, stripSectionTags } from '../lib/sections'
-import { HeartPulse, ShieldAlert, ListChecks, BookOpen, Info } from 'lucide-react'
+import {
+  Activity, Apple, Baby, BookMarked, BookOpen, Dumbbell, FlaskConical,
+  HeartPulse, Info, LifeBuoy, ListChecks, MessageCircle, Microscope, Phone,
+  Pill, ShieldAlert, ShieldCheck, Siren, Stethoscope, TrendingUp, TriangleAlert, Users,
+} from 'lucide-react'
 
-type MarkdownSectionKind = 'assessment' | 'urgent' | 'selfcare' | 'sources' | 'body'
+type MarkdownSectionKind =
+  | 'assessment' | 'urgent' | 'selfcare' | 'sources' | 'body' | 'extra'
+  | 'causes' | 'symptoms' | 'diagnosis' | 'tests' | 'treatment' | 'prevention'
+  | 'riskfactors' | 'complications' | 'prognosis' | 'lifestyle' | 'diet'
+  | 'firstaid' | 'emergency' | 'children' | 'elderly' | 'faq' | 'glossary' | 'contacts'
 type MarkdownSection = { title: string; content: string; kind: MarkdownSectionKind }
 type SourceCardData = { title: string; url: string; domain: string; excerpt: string }
 
@@ -30,7 +38,12 @@ function splitSections(content: string): MarkdownSection[] {
       if (raw === 'urgent') return { title: 'When to seek care quickly', content: body, kind: 'urgent' }
       if (raw === 'selfcare' || raw === 'actions') return { title: 'What you can do now', content: body, kind: 'selfcare' }
       if (raw === 'sources') return { title: 'Sources & further reading', content: body, kind: 'sources' }
-      return { title: 'Overview', content: body, kind: 'body' }
+      if (raw === 'body') return { title: 'Overview', content: body, kind: 'body' }
+      // Catalog extras render as their own styled cards with prettified titles.
+      const known: MarkdownSectionKind[] = ['causes', 'symptoms', 'diagnosis', 'tests', 'treatment', 'prevention', 'riskfactors', 'complications', 'prognosis', 'lifestyle', 'diet', 'firstaid', 'emergency', 'children', 'elderly', 'faq', 'glossary', 'contacts']
+      const pretty = raw.replace(/[_-]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+      if ((known as string[]).includes(raw)) return { title: pretty || 'Details', content: body, kind: raw as MarkdownSectionKind }
+      return { title: pretty || 'Details', content: body, kind: 'extra' }
     }
     return blocks.map((b) => toSection(b.kind, stripSectionTags(b.body)))
   }
@@ -141,12 +154,37 @@ function SourceCards({ content }: { content: string }) {
   )
 }
 
+const CARD = 'border-line bg-card dark:border-[#2c4039] dark:bg-[#192622]'
+const TEAL = 'border-accent-border bg-accent-soft/70 dark:border-[#296659] dark:bg-[#21302b]'
+const AMBER = 'border-amber-200 bg-amber-50 dark:border-[#8a6a10] dark:bg-[#2b2410]'
+const DANGER = 'border-[#dc2626]/30 bg-[#dc2626]/[.06] dark:border-[#dc2626]/40 dark:bg-[#dc2626]/10'
+const ACCENT_BADGE = 'bg-accent text-white dark:bg-[#257d6e] dark:text-white'
+
 const sectionConfig: Record<MarkdownSectionKind, { style: string; icon: typeof HeartPulse; badge: string }> = {
-  assessment: { style: 'border-line bg-card dark:border-[#2c4039] dark:bg-[#192622]', icon: HeartPulse, badge: 'bg-accent text-white dark:bg-[#257d6e] dark:text-white' },
-  selfcare: { style: 'border-accent-border bg-accent-soft/70 dark:border-[#296659] dark:bg-[#21302b]', icon: ListChecks, badge: 'bg-accent text-white dark:bg-[#257d6e] dark:text-white' },
-  urgent: { style: 'border-amber-200 bg-amber-50 dark:border-[#8a6a10] dark:bg-[#2b2410]', icon: ShieldAlert, badge: 'bg-amber-500 text-white' },
-  sources: { style: 'border-line bg-card-subtle dark:border-[#22332c] dark:bg-[#21302b]/50', icon: BookOpen, badge: 'bg-accent text-white dark:bg-[#257d6e] dark:text-white' },
-  body: { style: 'border-line bg-card dark:border-[#2c4039] dark:bg-[#192622]', icon: Info, badge: 'bg-faint text-white' },
+  assessment: { style: CARD, icon: HeartPulse, badge: ACCENT_BADGE },
+  selfcare: { style: TEAL, icon: ListChecks, badge: ACCENT_BADGE },
+  urgent: { style: AMBER, icon: ShieldAlert, badge: 'bg-amber-500 text-white' },
+  emergency: { style: DANGER, icon: Siren, badge: 'bg-[#dc2626] text-white' },
+  sources: { style: 'border-line bg-card-subtle dark:border-[#22332c] dark:bg-[#21302b]/50', icon: BookOpen, badge: ACCENT_BADGE },
+  body: { style: CARD, icon: Info, badge: 'bg-faint text-white' },
+  extra: { style: CARD, icon: Info, badge: ACCENT_BADGE },
+  causes: { style: CARD, icon: FlaskConical, badge: ACCENT_BADGE },
+  symptoms: { style: CARD, icon: Activity, badge: ACCENT_BADGE },
+  diagnosis: { style: CARD, icon: Stethoscope, badge: ACCENT_BADGE },
+  tests: { style: CARD, icon: Microscope, badge: ACCENT_BADGE },
+  treatment: { style: TEAL, icon: Pill, badge: ACCENT_BADGE },
+  prevention: { style: TEAL, icon: ShieldCheck, badge: ACCENT_BADGE },
+  riskfactors: { style: CARD, icon: TriangleAlert, badge: ACCENT_BADGE },
+  complications: { style: AMBER, icon: ShieldAlert, badge: 'bg-amber-500 text-white' },
+  prognosis: { style: CARD, icon: TrendingUp, badge: ACCENT_BADGE },
+  lifestyle: { style: TEAL, icon: Dumbbell, badge: ACCENT_BADGE },
+  diet: { style: TEAL, icon: Apple, badge: ACCENT_BADGE },
+  firstaid: { style: TEAL, icon: LifeBuoy, badge: ACCENT_BADGE },
+  children: { style: CARD, icon: Baby, badge: ACCENT_BADGE },
+  elderly: { style: CARD, icon: Users, badge: ACCENT_BADGE },
+  faq: { style: CARD, icon: MessageCircle, badge: ACCENT_BADGE },
+  glossary: { style: CARD, icon: BookMarked, badge: ACCENT_BADGE },
+  contacts: { style: TEAL, icon: Phone, badge: ACCENT_BADGE },
 }
 
 export function hasHealthUI(content: string): boolean {

@@ -2,6 +2,12 @@
 // Models emit variants: `[SECTION: urgent]` (space), `**[SECTION:x]**`
 // (bold), inline mid-line tags. Normalize everything to canonical
 // line-tags, then split — so all sections always parse.
+//
+// The backend may emit any of ~22 catalog tags (assessment, urgent,
+// selfcare, sources, causes, symptoms, diagnosis, tests, treatment,
+// prevention, riskfactors, complications, prognosis, lifestyle, diet,
+// firstaid, emergency, children, elderly, faq, glossary, contacts…).
+// Unknown tags still split and render as generic cards.
 
 export type SectionKind = 'assessment' | 'urgent' | 'selfcare' | 'sources'
 
@@ -9,8 +15,8 @@ export const SECTION_KINDS: SectionKind[] = ['assessment', 'urgent', 'selfcare',
 
 export function normalizeSections(content: string): string {
   return content
-    .replace(/\*\*\[SECTION:\s*(assessment|urgent|selfcare|sources|actions|body)\s*\]\*\*/gi, '\n[SECTION:$1]\n')
-    .replace(/\[SECTION:\s*(assessment|urgent|selfcare|sources|actions|body)\s*\]/gi, '\n[SECTION:$1]\n')
+    .replace(/\*\*\[SECTION:\s*([a-z]+)\s*\]\*\*/gi, '\n[SECTION:$1]\n')
+    .replace(/\[SECTION:\s*([a-z]+)\s*\]/gi, '\n[SECTION:$1]\n')
 }
 
 export function splitNormalized(normalized: string): Array<{ kind: string; body: string }> {

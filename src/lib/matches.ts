@@ -26,7 +26,22 @@ function cleanLabel(raw: string): string {
     .slice(0, 64)
 }
 
-const SKIP = /(^based on your description|^this information is educational|^because breathing|seek (prompt|immediate)|clinician|urgent-care|\?$)/i
+const SKIP = /(^based on your description|^this information is educational|^because breathing|seek (prompt|immediate)|clinician|urgent-care|primary-?care|call emergency|go to (the )?(nearest|emergency)|avoid (starting|stopping|self)|track symptoms|bring a medication|book a|visit is|evaluation|\?$)/i
+
+// Advice verbs — a "condition" telling you to do something isn't an illness.
+const VERB_LEAD = /^(seek|call|go|avoid|track|bring|book|visit|contact|watch|monitor|try|take|get|make|keep|stay|rest|drink|eat|apply|use|do|don't|do not|if |when |because )/i
+
+function looksLikeIllness(rawBullet: string, label: string): boolean {
+  // Strong signal: the model bolds the condition name at the bullet start.
+  if (/^\s*[-*+•]?\s*\d*\.?\s*\*\*[^*]+\*\*/.test(rawBullet)) return true
+  // Weak signal: short noun-like label with no advice verbs.
+  const words = label.split(/\s+/)
+  if (words.length > 5 || VERB_LEAD.test(label)) return false
+  // Illness-ish morphology or known families.
+  if (/(itis|osis|emia|pathy|algia|dynia|oma|syndrome|disease|disorder|infection|fever|flu\b|cold\b|covid|throat|allergy|asthma|migraine|anemia|ulcer|hernia|eczema|psoriasis|bronchitis|pneumonia|gastritis|arthritis|diabetes|hypertension|anxiety|depression)\b/i.test(label)) return true
+  // Short capitalized noun phrase, e.g. "Strep Throat", "Common Cold".
+  return words.length >= 1 && words.length <= 4 && /^[A-Z]/.test(label) && !VERB_LEAD.test(label)
+}
 
 export function extractMatches(content: string): MatchCandidate[] {
   const blocks = splitNormalized(normalizeSections(content))
@@ -39,6 +54,7 @@ export function extractMatches(content: string): MatchCandidate[] {
     if (!/^\s*[-*+•]/.test(trimmed) && !/^\d+\./.test(trimmed)) continue
     const label = cleanLabel(trimmed.replace(/^\d+\.\s*/, ''))
     if (label.length < 3 || SKIP.test(label)) continue
+    if (!looksLikeIllness(trimmed, label)) continue
     if (out.some((c) => c.label.toLowerCase() === label.toLowerCase())) continue
     const score = Math.min(94, Math.max(15, BASE_SCORES[out.length] + hashJitter(label)))
     out.push({ label, score })

@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ChatMessage } from '../types/app'
 import { MarkdownResponse, hasHealthUI } from './MarkdownResponse'
-import { AlertTriangle, ExternalLink, Globe, Pencil, Volume2, Square, FastForward, Plus, Copy, Check, Sparkles } from 'lucide-react'
-import { FollowUpBar, MatchMeter, TrustFooter } from './chat/messageExtras'
+import { AlertTriangle, Download, ExternalLink, Globe, Pencil, Volume2, Square, FastForward, Plus, Copy, Check, Sparkles } from 'lucide-react'
+import { FollowUpBar, MatchMeter, QuickReplies, TrustFooter } from './chat/messageExtras'
+import { extractQuickReplies, stripQuickReplies } from '../lib/quickreplies'
 import { extractMatches } from '../lib/matches'
 import { normalizeSections, splitNormalized } from '../lib/sections'
 import { GlassBubble } from './GlassBubble'
@@ -67,7 +68,7 @@ function AnswerFloaters({ message }: { message: ChatMessage }) {
   )
 }
 export function ChatMessages({
-  messages, isSending, ttsVoice = 'auto', onEditMessage, onRegenerate, onSelectFollowUp,
+  messages, isSending, ttsVoice = 'auto', onEditMessage, onRegenerate, onSelectFollowUp, onPrefill,
 }: {
   messages: ChatMessage[]
   isSending: boolean
@@ -75,6 +76,7 @@ export function ChatMessages({
   onEditMessage?: (index: number) => void
   onRegenerate?: () => void
   onSelectFollowUp?: (text: string) => void
+  onPrefill?: (text: string) => void
 }) {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
   const [speakingIndex, setSpeakingIndex] = useState<number | null>(null)
@@ -122,12 +124,28 @@ export function ChatMessages({
   }
   const cycleRate = () => setPlaybackRate(r => r === 1.0 ? 1.25 : r === 1.25 ? 1.5 : 1.0)
 
+  const handleDownload = (content: string, index: number) => {
+    const blob = new Blob([stripQuickReplies(content)], { type: 'text/plain;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `medik-answer-${index + 1}.txt`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    setTimeout(() => URL.revokeObjectURL(url), 5000)
+  }
+
   const actionBtn = 'inline-flex min-h-[32px] items-center gap-1 rounded-full border border-line bg-card px-2.5 text-[11px] font-semibold text-muted transition hover:border-accent-border hover:bg-accent-soft hover:text-accent dark:border-[#22332c] dark:bg-[#21302b] dark:text-[#9eb5ae] dark:hover:text-accent-bright'
 
   return (
     <div ref={conversationRef} onScroll={handleScroll} aria-live="polite" className="mx-auto mb-3 flex min-h-0 w-full max-w-[720px] min-w-0 flex-1 flex-col gap-4 overflow-y-auto overflow-x-clip px-1 py-2 sm:px-1.5">
       {messages.map((message, index) => {
-        const sources = message.role === 'assistant' ? extractSourcesFromMarkdown(message.content) : []
+        const rawContent = message.content
+        // Quick-reply markers drive chips — never shown as text, copied, or read aloud.
+        const content = message.role === 'assistant' ? stripQuickReplies(rawContent) : rawContent
+        const quickReplies = message.role === 'assistant' ? extractQuickReplies(rawContent) : []
+        const sources = message.role === 'assistant' ? extractSourcesFromMarkdown(content) : []
         const isUser = message.role === 'user'
         const isLastAssistant = message.role === 'assistant' && messages.slice(index + 1).every(m => m.role !== 'assistant')
         const followUps = isLastAssistant && !isSending && onSelectFollowUp ? deriveFollowUps(message) : []
@@ -149,7 +167,7 @@ export function ChatMessages({
                 : 'w-full rounded-bl-md border-line dark:border-[#2c4039]',
             )}
           >
-            {message.role === 'assistant' && message.content.trim() && <AnswerFloaters message={message} />}
+            {message.role === 'assistant' && content.trim() && <AnswerFloaters message={{ ...message, content }} />}
             {message.role === 'assistant' && (
               <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-line-soft pb-2.5 dark:border-[#22332c]">
                 <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.06em] text-accent dark:text-accent-bright">
@@ -157,12 +175,15 @@ export function ChatMessages({
                   Medik Triage
                 </p>
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <button type="button" onClick={() => handleToggleSpeech(message.content, index)} title={isSpeaking ? 'Stop' : 'Listen'} className={cn(actionBtn, isSpeaking && 'border-[#dc2626]/30 bg-[#dc2626]/10 text-[#dc2626] hover:text-white hover:bg-[#dc2626]')}>
+                  <button type="button" onClick={() => handleToggleSpeech(content, index)} title={isSpeaking ? 'Stop' : 'Listen'} className={cn(actionBtn, isSpeaking && 'border-[#dc2626]/30 bg-[#dc2626]/10 text-[#dc2626] hover:text-white hover:bg-[#dc2626]')}>
                     {isSpeaking ? <><Square size={12} /><span>Stop</span></> : <><Volume2 size={12} /><span>Listen</span></>}
                   </button>
                   <button type="button" onClick={cycleRate} title="Playback speed" className={actionBtn}><FastForward size={12} /><span>{playbackRate}x</span></button>
-                  <button type="button" onClick={() => handleCopy(message.content, index)} title="Copy" className={actionBtn}>
+                  <button type="button" onClick={() => handleCopy(content, index)} title="Copy" className={actionBtn}>
                     {copiedIndex === index ? <><Check size={12} /><span>Copied</span></> : <><Copy size={12} /><span>Copy</span></>}
+                  </button>
+                  <button type="button" onClick={() => handleDownload(content, index)} title="Download answer" className={actionBtn}>
+                    <Download size={12} /><span>Save</span>
                   </button>
                 </div>
               </div>
@@ -172,9 +193,9 @@ export function ChatMessages({
               <div className="my-2 flex items-center gap-2 rounded-xl border border-[#f59e0b]/30 bg-[#f59e0b]/10 p-3 text-xs text-[#92400e] dark:text-[#fcd34d]" role="alert"><span aria-hidden="true">⚠️</span><span>{message.warning}</span></div>
             )}
 
-            {message.role === 'assistant' ? <MarkdownResponse content={message.content} /> : (
+            {message.role === 'assistant' ? <MarkdownResponse content={content} /> : (
               <div>
-                <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                <p className="whitespace-pre-wrap break-words">{content}</p>
                 {onEditMessage && (
                   <div className="mt-2 flex min-h-[32px] justify-end">
                     {isSending ? (
@@ -205,8 +226,16 @@ export function ChatMessages({
             )}
 
             <TrustFooter message={message} sourceCount={sourceCount} />
-            {message.role === 'assistant' && message.content.trim() && (
-              <MatchMeter matches={extractMatches(message.content)} />
+            {message.role === 'assistant' && content.trim() && (
+              <MatchMeter
+                matches={extractMatches(content)}
+                onSelectMatch={onSelectFollowUp && !isSending
+                  ? (label) => onSelectFollowUp(`Tell me more about "${label}": what causes it, its key symptoms, and when I should worry.`)
+                  : undefined}
+              />
+            )}
+            {isLastAssistant && !isSending && onPrefill && quickReplies.length > 0 && (
+              <QuickReplies replies={quickReplies} onPrefill={onPrefill} />
             )}
             {/* Health-only extras: casual replies stay a plain bubble. */}
             {isLastAssistant && !isSending && hasHealthUI(message.content) && (
