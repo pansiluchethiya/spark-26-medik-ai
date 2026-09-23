@@ -149,9 +149,18 @@ const sectionConfig: Record<MarkdownSectionKind, { style: string; icon: typeof H
   body: { style: 'border-line bg-card dark:border-[#2c4039] dark:bg-[#192622]', icon: Info, badge: 'bg-faint text-white' },
 }
 
+export function hasHealthUI(content: string): boolean {
+  if (/\[SECTION:\s*(assessment|urgent|selfcare|sources|actions|body)\s*\]/i.test(content)) return true
+  return /^\s*#{1,6}\s+\S/m.test(content)
+}
+
 export function MarkdownResponse({ content }: { content: string }) {
   // NOTE: do NOT strip tags before splitting — splitSections needs them
   // as boundaries (it already strips leftovers from each body).
+  // Casual (non-health) replies render as a plain bubble — no section cards.
+  if (!hasHealthUI(content)) {
+    return <MarkdownContent content={content} />
+  }
   const sections = splitSections(content)
   return (
     <div className="grid min-w-0 gap-3">

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ChatMessage } from '../types/app'
-import { MarkdownResponse } from './MarkdownResponse'
+import { MarkdownResponse, hasHealthUI } from './MarkdownResponse'
 import { AlertTriangle, ExternalLink, Globe, Pencil, Volume2, Square, FastForward, Plus, Copy, Check, Sparkles } from 'lucide-react'
 import { FollowUpBar, MatchMeter, TrustFooter } from './chat/messageExtras'
 import { extractMatches } from '../lib/matches'
@@ -208,10 +208,11 @@ export function ChatMessages({
             {message.role === 'assistant' && message.content.trim() && (
               <MatchMeter matches={extractMatches(message.content)} />
             )}
-            {isLastAssistant && !isSending && (
+            {/* Health-only extras: casual replies stay a plain bubble. */}
+            {isLastAssistant && !isSending && hasHealthUI(message.content) && (
               <FollowUpBar followUps={followUps} actionClass={actionBtn} onRegenerate={onRegenerate} onSelectFollowUp={(text) => onSelectFollowUp?.(text)} />
             )}
-            {isLastAssistant && !isSending && (
+            {isLastAssistant && !isSending && hasHealthUI(message.content) && (
               <p className="mt-2 flex items-center gap-1 text-[10px] text-faint dark:text-[#6e857e]"><Sparkles size={10} /> AI information only — not a medical diagnosis</p>
             )}
           </GlassBubble>
